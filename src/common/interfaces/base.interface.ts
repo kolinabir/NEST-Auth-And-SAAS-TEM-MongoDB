@@ -34,5 +34,9 @@ export interface BaseRepository<T extends BaseDocument> {
   create(data: any): Promise<T>;
   update(id: string, data: any): Promise<T>;
   delete(id: string): Promise<boolean>;
-  paginate(page: number, limit: number, filter?: any): Promise<PaginatedResponse<T>>;
+  paginate(
+    page: number,
+    limit: number,
+    filter?: any,
+  ): Promise<PaginatedResponse<T>>;
 }

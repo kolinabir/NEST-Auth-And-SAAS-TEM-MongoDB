@@ -7,6 +7,7 @@ This document breaks down the implementation of the SaaS template into manageabl
 **Estimated time: 2-3 hours**
 
 **Tasks:**
+
 - Initialize NestJS project
 - Configure MongoDB connection
 - Set up project structure
@@ -14,12 +15,14 @@ This document breaks down the implementation of the SaaS template into manageabl
 - Implement basic logging
 
 **Required packages:**
+
 ```bash
 pnpm add @nestjs/common @nestjs/core @nestjs/config @nestjs/mongoose mongoose nestjs-pino pino-http reflect-metadata rxjs
 pnpm add -D @types/node @nestjs/cli typescript ts-node
 ```
 
 **Files to create:**
+
 - src/main.ts
 - src/app.module.ts
 - src/config/database.config.ts
@@ -31,6 +34,7 @@ pnpm add -D @types/node @nestjs/cli typescript ts-node
 **Estimated time: 3-4 hours**
 
 **Tasks:**
+
 - Create user schema
 - Implement user repository
 - Create user service with CRUD operations
@@ -38,11 +42,13 @@ pnpm add -D @types/node @nestjs/cli typescript ts-node
 - Add validation DTOs
 
 **Required packages:**
+
 ```bash
 pnpm add class-validator class-transformer @nestjs/mapped-types
 ```
 
 **Files to create:**
+
 - src/users/schemas/user.schema.ts
 - src/users/dto/create-user.dto.ts
 - src/users/dto/update-user.dto.ts
@@ -56,6 +62,7 @@ pnpm add class-validator class-transformer @nestjs/mapped-types
 **Estimated time: 4-5 hours**
 
 **Tasks:**
+
 - Implement password hashing
 - Create local authentication strategy
 - Set up JWT authentication
@@ -63,12 +70,14 @@ pnpm add class-validator class-transformer @nestjs/mapped-types
 - Implement login/register endpoints
 
 **Required packages:**
+
 ```bash
 npm install @nestjs/passport @nestjs/jwt passport passport-local passport-jwt bcrypt
 npm install --save-dev @types/passport-local @types/passport-jwt @types/bcrypt
 ```
 
 **Files to create:**
+
 - src/auth/strategies/local.strategy.ts
 - src/auth/strategies/jwt.strategy.ts
 - src/auth/guards/jwt-auth.guard.ts
@@ -83,18 +92,21 @@ npm install --save-dev @types/passport-local @types/passport-jwt @types/bcrypt
 **Estimated time: 3-4 hours**
 
 **Tasks:**
+
 - Implement Google OAuth strategy
 - Implement Facebook OAuth strategy
 - Implement GitHub OAuth strategy
 - Create unified OAuth flow
 
 **Required packages:**
+
 ```bash
 npm install passport-google-oauth20 passport-facebook passport-github
 npm install --save-dev @types/passport-google-oauth20 @types/passport-facebook @types/passport-github
 ```
 
 **Files to create:**
+
 - src/auth/strategies/google.strategy.ts
 - src/auth/strategies/facebook.strategy.ts
 - src/auth/strategies/github.strategy.ts
@@ -107,6 +119,7 @@ npm install --save-dev @types/passport-google-oauth20 @types/passport-facebook @
 **Estimated time: 3-4 hours**
 
 **Tasks:**
+
 - Create subscription schema
 - Define subscription tiers
 - Implement subscription repository
@@ -114,6 +127,7 @@ npm install --save-dev @types/passport-google-oauth20 @types/passport-facebook @
 - Add subscription controller
 
 **Files to create:**
+
 - src/subscriptions/schemas/subscription.schema.ts
 - src/subscriptions/dto/create-subscription.dto.ts
 - src/subscriptions/dto/update-subscription.dto.ts
@@ -128,6 +142,7 @@ npm install --save-dev @types/passport-google-oauth20 @types/passport-facebook @
 **Estimated time: 4-5 hours**
 
 **Tasks:**
+
 - Set up Stripe client
 - Implement payment processing
 - Create webhook handler
@@ -135,11 +150,13 @@ npm install --save-dev @types/passport-google-oauth20 @types/passport-facebook @
 - Handle payment failures
 
 **Required packages:**
+
 ```bash
 npm install stripe
 ```
 
 **Files to create:**
+
 - src/payments/payments.service.ts
 - src/payments/payments.controller.ts
 - src/payments/payments.module.ts
@@ -152,17 +169,20 @@ npm install stripe
 **Estimated time: 3-4 hours**
 
 **Tasks:**
+
 - Implement central feature configuration
 - Create rate limiting guard
 - Implement subscription-based access control
 - Add feature flag system
 
 **Required packages:**
+
 ```bash
 npm install @nestjs/throttler
 ```
 
 **Files to create:**
+
 - src/features/features.service.ts
 - src/features/features.module.ts
 - src/features/guards/api-limit.guard.ts
@@ -175,6 +195,7 @@ npm install @nestjs/throttler
 **Estimated time: 3-4 hours**
 
 **Tasks:**
+
 - Create project schema
 - Implement project repository
 - Create project service with CRUD
@@ -182,6 +203,7 @@ npm install @nestjs/throttler
 - Implement project limitations based on subscription
 
 **Files to create:**
+
 - src/projects/schemas/project.schema.ts
 - src/projects/dto/create-project.dto.ts
 - src/projects/dto/update-project.dto.ts
@@ -196,6 +218,7 @@ npm install @nestjs/throttler
 **Estimated time: 4-5 hours**
 
 **Tasks:**
+
 - Create team schema
 - Implement team repository
 - Create team service
@@ -204,12 +227,14 @@ npm install @nestjs/throttler
 - Set up team member limitations
 
 **Required packages:**
+
 ```bash
 npm install uuid
 npm install --save-dev @types/uuid
 ```
 
 **Files to create:**
+
 - src/teams/schemas/team.schema.ts
 - src/teams/dto/create-team.dto.ts
 - src/teams/dto/update-team.dto.ts
@@ -225,6 +250,7 @@ npm install --save-dev @types/uuid
 **Estimated time: 3-4 hours**
 
 **Tasks:**
+
 - Set up email service
 - Create email templates
 - Implement transactional emails for:
@@ -234,12 +260,14 @@ npm install --save-dev @types/uuid
   - Subscription updates
 
 **Required packages:**
+
 ```bash
 npm install @nestjs-modules/mailer nodemailer handlebars
 npm install --save-dev @types/nodemailer
 ```
 
 **Files to create:**
+
 - src/emails/emails.service.ts
 - src/emails/emails.module.ts
 - src/emails/templates/welcome.hbs
@@ -252,6 +280,7 @@ npm install --save-dev @types/nodemailer
 **Estimated time: 3-4 hours**
 
 **Tasks:**
+
 - Create API usage schema
 - Implement usage tracking service
 - Add usage tracking middleware
@@ -259,6 +288,7 @@ npm install --save-dev @types/nodemailer
 - Set up usage limitations based on subscription
 
 **Files to create:**
+
 - src/usage/schemas/api-usage.schema.ts
 - src/usage/usage.service.ts
 - src/usage/usage.controller.ts
@@ -271,6 +301,7 @@ npm install --save-dev @types/nodemailer
 **Estimated time: 4-5 hours**
 
 **Tasks:**
+
 - Create admin-only endpoints
 - Implement user management for admins
 - Add subscription management tools
@@ -278,6 +309,7 @@ npm install --save-dev @types/nodemailer
 - Implement user impersonation for support
 
 **Files to create:**
+
 - src/admin/admin.service.ts
 - src/admin/admin.controller.ts
 - src/admin/admin.module.ts
@@ -290,6 +322,7 @@ npm install --save-dev @types/nodemailer
 **Estimated time: 3-4 hours**
 
 **Tasks:**
+
 - Implement CSRF protection
 - Set up rate limiting
 - Add request validation pipe
@@ -297,11 +330,13 @@ npm install --save-dev @types/nodemailer
 - Create security logging
 
 **Required packages:**
+
 ```bash
 npm install helmet csurf express-rate-limit
 ```
 
 **Files to create:**
+
 - src/security/security.module.ts
 - src/security/middleware/csrf.middleware.ts
 - src/security/guards/rate-limit.guard.ts
@@ -313,6 +348,7 @@ npm install helmet csurf express-rate-limit
 **Estimated time: 5-6 hours**
 
 **Tasks:**
+
 - Write unit tests for core services
 - Create integration tests
 - Set up E2E testing
@@ -320,12 +356,14 @@ npm install helmet csurf express-rate-limit
 - Create user documentation
 
 **Required packages:**
+
 ```bash
 npm install --save-dev jest @nestjs/testing supertest
 npm install @nestjs/swagger swagger-ui-express
 ```
 
 **Files to create:**
+
 - test/app.e2e-spec.ts
 - test/auth.e2e-spec.ts
 - test/users.e2e-spec.ts
@@ -339,6 +377,7 @@ npm install @nestjs/swagger swagger-ui-express
 **Estimated time: 3-4 hours**
 
 **Tasks:**
+
 - Create Docker configuration
 - Set up CI/CD pipeline
 - Configure production environment
@@ -346,6 +385,7 @@ npm install @nestjs/swagger swagger-ui-express
 - Set up monitoring
 
 **Files to create:**
+
 - Dockerfile
 - docker-compose.yml
 - .github/workflows/ci.yml

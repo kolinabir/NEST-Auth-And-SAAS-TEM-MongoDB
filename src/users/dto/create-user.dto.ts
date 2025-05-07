@@ -1,4 +1,11 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { SubscriptionTier, UserRole } from '../schemas/user.schema';
 
 export class CreateUserDto {

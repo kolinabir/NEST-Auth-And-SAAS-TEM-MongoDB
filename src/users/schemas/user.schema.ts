@@ -54,7 +54,11 @@ export class User {
   @Prop({ type: String, enum: UserRole, default: UserRole.USER })
   role: UserRole;
 
-  @Prop({ type: String, enum: SubscriptionTier, default: SubscriptionTier.FREE })
+  @Prop({
+    type: String,
+    enum: SubscriptionTier,
+    default: SubscriptionTier.FREE,
+  })
   subscriptionTier: SubscriptionTier;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Subscription' })

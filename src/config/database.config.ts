@@ -2,7 +2,7 @@ import { registerAs } from '@nestjs/config';
 
 export default registerAs('database', () => ({
   uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/saas-template',
-  
+
   // Add optional database configuration options
   options: {
     connectTimeoutMS: 5000,
@@ -10,7 +10,7 @@ export default registerAs('database', () => ({
     maxPoolSize: 50,
     minPoolSize: 5,
   },
-  
+
   // Add database document TTL configurations (time to live)
   ttl: {
     passwordReset: 24 * 60 * 60, // 24 hours in seconds

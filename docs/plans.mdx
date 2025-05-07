@@ -9,6 +9,7 @@ Our SaaS platform offers the following subscription tiers:
 ### Free Tier
 
 **Price**: $0/month
+
 - User authentication
 - Basic dashboard access
 - Limited API calls (100/day)
@@ -19,6 +20,7 @@ Our SaaS platform offers the following subscription tiers:
 ### Starter Tier
 
 **Price**: $9.99/month
+
 - Everything in Free tier
 - Increased API calls (1,000/day)
 - 3 projects
@@ -29,6 +31,7 @@ Our SaaS platform offers the following subscription tiers:
 ### Professional Tier
 
 **Price**: $29.99/month
+
 - Everything in Starter tier
 - Increased API calls (10,000/day)
 - 10 projects
@@ -41,6 +44,7 @@ Our SaaS platform offers the following subscription tiers:
 ### Enterprise Tier
 
 **Price**: $99.99/month
+
 - Everything in Professional tier
 - Unlimited API calls
 - Unlimited projects
@@ -70,7 +74,7 @@ export class ApiLimitGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    
+
     // Get daily limit based on subscription tier
     const tierLimits = {
       free: 100,
@@ -78,14 +82,16 @@ export class ApiLimitGuard implements CanActivate {
       professional: 10000,
       enterprise: Number.MAX_SAFE_INTEGER,
     };
-    
+
     const limit = tierLimits[user.subscriptionTier] || tierLimits.free;
     const currentUsage = await this.userService.getDailyApiUsage(user.id);
-    
+
     if (currentUsage >= limit) {
-      throw new ForbiddenException('Daily API limit reached for your subscription tier');
+      throw new ForbiddenException(
+        'Daily API limit reached for your subscription tier',
+      );
     }
-    
+
     // Increment usage counter
     await this.userService.incrementApiUsage(user.id);
     return true;
@@ -107,17 +113,21 @@ export class ProjectService {
     enterprise: Number.MAX_SAFE_INTEGER,
   };
 
-  async createProject(userId: string, projectData: CreateProjectDto): Promise<Project> {
+  async createProject(
+    userId: string,
+    projectData: CreateProjectDto,
+  ): Promise<Project> {
     const user = await this.userService.findById(userId);
     const currentProjects = await this.countUserProjects(userId);
-    const limit = this.projectLimits[user.subscriptionTier] || this.projectLimits.free;
-    
+    const limit =
+      this.projectLimits[user.subscriptionTier] || this.projectLimits.free;
+
     if (currentProjects >= limit) {
       throw new ForbiddenException(
-        `Your subscription allows a maximum of ${limit} projects. Upgrade to create more.`
+        `Your subscription allows a maximum of ${limit} projects. Upgrade to create more.`,
       );
     }
-    
+
     // Create the project
     return this.projectRepository.create({
       ...projectData,
@@ -141,18 +151,23 @@ export class TeamService {
     enterprise: Number.MAX_SAFE_INTEGER,
   };
 
-  async addTeamMember(teamId: string, newMemberEmail: string): Promise<TeamMember> {
+  async addTeamMember(
+    teamId: string,
+    newMemberEmail: string,
+  ): Promise<TeamMember> {
     const team = await this.teamRepository.findById(teamId);
     const owner = await this.userService.findById(team.ownerId);
     const currentMembers = await this.countTeamMembers(teamId);
-    const limit = this.teamMemberLimits[owner.subscriptionTier] || this.teamMemberLimits.free;
-    
+    const limit =
+      this.teamMemberLimits[owner.subscriptionTier] ||
+      this.teamMemberLimits.free;
+
     if (currentMembers >= limit) {
       throw new ForbiddenException(
-        `Your subscription allows a maximum of ${limit} team members. Upgrade to add more.`
+        `Your subscription allows a maximum of ${limit} team members. Upgrade to add more.`,
       );
     }
-    
+
     // Add the team member
     return this.teamMemberRepository.create({
       teamId,
@@ -224,6 +239,7 @@ Our SaaS template follows a modern microservices-oriented architecture:
 ### 2. Technology Stack
 
 #### Backend
+
 - **Framework**: NestJS (Node.js)
 - **Database**: MongoDB with Mongoose
 - **Authentication**: Passport.js with multiple strategies
@@ -231,6 +247,7 @@ Our SaaS template follows a modern microservices-oriented architecture:
 - **Testing**: Jest for unit/integration tests
 
 #### Frontend (Recommended Integration)
+
 - React/Next.js or Vue.js/Nuxt
 - TailwindCSS for styling
 - Redux/Vuex for state management
@@ -267,24 +284,29 @@ The template includes a comprehensive authentication system with:
 ### 6. Database Schema
 
 #### Core Collections:
+
 - **Users**
+
   - Authentication details
   - Profile information
   - Subscription references
   - Usage statistics
 
 - **Subscriptions**
+
   - Plan information
   - Billing details
   - Payment history
   - Feature access flags
 
 - **Projects**
+
   - Project metadata
   - User/team associations
   - Resource usage tracking
 
 - **Teams**
+
   - Team members
   - Role assignments
   - Associated projects
@@ -311,31 +333,37 @@ The API will follow RESTful principles with these core endpoints:
 ### 8. Development Roadmap
 
 #### Phase 1: Core Infrastructure
+
 - Basic NestJS setup with MongoDB connection
 - User model and authentication (local strategy)
 - Initial API structure
 
 #### Phase 2: Authentication Expansion
+
 - OAuth2 providers integration
 - JWT implementation
 - Email verification
 
 #### Phase 3: Subscription Framework
+
 - Stripe integration
 - Subscription models
 - Payment processing
 
 #### Phase 4: Feature Management
+
 - Role-based access controls
 - Usage tracking
 - Feature flag implementation
 
 #### Phase 5: Team Management
+
 - Team creation and management
 - Invitations and permissions
 - Shared resources
 
 #### Phase 6: Advanced Features
+
 - Analytics and reporting
 - Admin dashboard
 - Enhanced security features
@@ -344,7 +372,7 @@ The API will follow RESTful principles with these core endpoints:
 
 - **Containerization**: Docker for consistent environments
 - **CI/CD**: GitHub Actions or GitLab CI
-- **Hosting Options**: 
+- **Hosting Options**:
   - AWS (ECS, Fargate, Lambda)
   - Google Cloud (Cloud Run, GKE)
   - Azure (App Service, AKS)
