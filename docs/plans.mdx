@@ -1,0 +1,373 @@
+# SaaS Subscription Plans
+
+This document outlines the subscription plans and feature limitations for our SaaS application. This can be customized based on your specific business requirements.
+
+## Subscription Tiers
+
+Our SaaS platform offers the following subscription tiers:
+
+### Free Tier
+
+**Price**: $0/month
+- User authentication
+- Basic dashboard access
+- Limited API calls (100/day)
+- 1 project
+- Community support
+- 7-day data retention
+
+### Starter Tier
+
+**Price**: $9.99/month
+- Everything in Free tier
+- Increased API calls (1,000/day)
+- 3 projects
+- Email support
+- 30-day data retention
+- Basic analytics
+
+### Professional Tier
+
+**Price**: $29.99/month
+- Everything in Starter tier
+- Increased API calls (10,000/day)
+- 10 projects
+- Priority email support
+- 90-day data retention
+- Advanced analytics
+- Team member access (up to 5)
+- Customizable dashboard
+
+### Enterprise Tier
+
+**Price**: $99.99/month
+- Everything in Professional tier
+- Unlimited API calls
+- Unlimited projects
+- 24/7 dedicated support
+- Unlimited data retention
+- Enterprise analytics
+- Team member access (unlimited)
+- Custom integrations
+- Dedicated account manager
+- SLA guarantee
+
+## Feature Limitation Implementation
+
+Feature limitations will be controlled through a centralized feature flag system. Here's how different features will be limited based on subscription tiers:
+
+### API Rate Limiting
+
+```typescript
+// Sample implementation
+@Injectable()
+export class ApiLimitGuard implements CanActivate {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+    
+    // Get daily limit based on subscription tier
+    const tierLimits = {
+      free: 100,
+      starter: 1000,
+      professional: 10000,
+      enterprise: Number.MAX_SAFE_INTEGER,
+    };
+    
+    const limit = tierLimits[user.subscriptionTier] || tierLimits.free;
+    const currentUsage = await this.userService.getDailyApiUsage(user.id);
+    
+    if (currentUsage >= limit) {
+      throw new ForbiddenException('Daily API limit reached for your subscription tier');
+    }
+    
+    // Increment usage counter
+    await this.userService.incrementApiUsage(user.id);
+    return true;
+  }
+}
+```
+
+### Project Limitations
+
+Projects will be limited by validating against the user's subscription tier before creating new projects:
+
+```typescript
+@Injectable()
+export class ProjectService {
+  private readonly projectLimits = {
+    free: 1,
+    starter: 3,
+    professional: 10,
+    enterprise: Number.MAX_SAFE_INTEGER,
+  };
+
+  async createProject(userId: string, projectData: CreateProjectDto): Promise<Project> {
+    const user = await this.userService.findById(userId);
+    const currentProjects = await this.countUserProjects(userId);
+    const limit = this.projectLimits[user.subscriptionTier] || this.projectLimits.free;
+    
+    if (currentProjects >= limit) {
+      throw new ForbiddenException(
+        `Your subscription allows a maximum of ${limit} projects. Upgrade to create more.`
+      );
+    }
+    
+    // Create the project
+    return this.projectRepository.create({
+      ...projectData,
+      userId,
+    });
+  }
+}
+```
+
+### Team Member Access
+
+Team members will be managed based on subscription tier:
+
+```typescript
+@Injectable()
+export class TeamService {
+  private readonly teamMemberLimits = {
+    free: 1,
+    starter: 1,
+    professional: 5,
+    enterprise: Number.MAX_SAFE_INTEGER,
+  };
+
+  async addTeamMember(teamId: string, newMemberEmail: string): Promise<TeamMember> {
+    const team = await this.teamRepository.findById(teamId);
+    const owner = await this.userService.findById(team.ownerId);
+    const currentMembers = await this.countTeamMembers(teamId);
+    const limit = this.teamMemberLimits[owner.subscriptionTier] || this.teamMemberLimits.free;
+    
+    if (currentMembers >= limit) {
+      throw new ForbiddenException(
+        `Your subscription allows a maximum of ${limit} team members. Upgrade to add more.`
+      );
+    }
+    
+    // Add the team member
+    return this.teamMemberRepository.create({
+      teamId,
+      email: newMemberEmail,
+    });
+  }
+}
+```
+
+## Customizing Plans and Features
+
+This structure allows for easy customization of plans and features:
+
+1. To add a new plan, update the tierLimits object in the relevant services
+2. To modify feature limitations, adjust the values in the tierLimits objects
+3. To add new features with tier-based limitations, follow the pattern above:
+   - Define limits per tier
+   - Check current usage against the limit
+   - Allow or deny the action based on the comparison
+
+The tier configuration can be moved to a central configuration service to make updating even easier:
+
+```typescript
+@Injectable()
+export class SubscriptionConfigService {
+  private readonly tierConfig = {
+    free: {
+      apiLimit: 100,
+      projectLimit: 1,
+      teamMemberLimit: 1,
+      dataRetentionDays: 7,
+      analyticsLevel: 'basic',
+      supportLevel: 'community',
+    },
+    starter: {
+      apiLimit: 1000,
+      projectLimit: 3,
+      teamMemberLimit: 1,
+      dataRetentionDays: 30,
+      analyticsLevel: 'basic',
+      supportLevel: 'email',
+    },
+    // Other tiers...
+  };
+
+  getLimit(tier: string, feature: string): number | string {
+    const tierSettings = this.tierConfig[tier] || this.tierConfig.free;
+    return tierSettings[feature];
+  }
+}
+```
+
+This approach allows for centralized management of feature limitations while keeping the business logic for enforcement separate.
+
+## Full SaaS Template Architecture
+
+### 1. System Architecture Overview
+
+Our SaaS template follows a modern microservices-oriented architecture:
+
+- **API Layer**: NestJS RESTful API backend
+- **Authentication System**: Multi-strategy auth with JWT and OAuth2
+- **Database Layer**: MongoDB with Mongoose ODM
+- **Payment Processing**: Stripe integration
+- **Notification System**: Email service with templates
+- **Feature Management**: Centralized permission system
+- **Monitoring & Analytics**: Usage tracking and reporting
+
+### 2. Technology Stack
+
+#### Backend
+- **Framework**: NestJS (Node.js)
+- **Database**: MongoDB with Mongoose
+- **Authentication**: Passport.js with multiple strategies
+- **API Documentation**: Swagger/OpenAPI
+- **Testing**: Jest for unit/integration tests
+
+#### Frontend (Recommended Integration)
+- React/Next.js or Vue.js/Nuxt
+- TailwindCSS for styling
+- Redux/Vuex for state management
+
+### 3. Authentication System Design
+
+The template includes a comprehensive authentication system with:
+
+- **Local Authentication**: Email/password with secure storage
+- **OAuth2 Providers**: Google, Facebook, GitHub integration
+- **JWT-based Sessions**: Stateless authentication
+- **Password Recovery**: Secure reset flow
+- **Email Verification**: Account validation
+- **Two-Factor Authentication**: Additional security layer
+
+### 4. User Management
+
+- **User Profiles**: Extensible user schema
+- **Role-Based Access Control**: Admin, user, custom roles
+- **Team Management**: Organization/workspace structure
+- **User Settings**: Preferences and notifications
+- **Account Deletion**: GDPR-compliant data handling
+
+### 5. Subscription & Payment Processing
+
+- **Stripe Integration**: Secure payment processing
+- **Subscription Management**: Create, update, cancel
+- **Webhooks**: Payment event handling
+- **Invoicing**: PDF generation and emailing
+- **Trial Periods**: Time-limited feature access
+- **Annual/Monthly Billing**: Flexible billing cycles
+- **Proration**: Handling plan changes mid-cycle
+
+### 6. Database Schema
+
+#### Core Collections:
+- **Users**
+  - Authentication details
+  - Profile information
+  - Subscription references
+  - Usage statistics
+
+- **Subscriptions**
+  - Plan information
+  - Billing details
+  - Payment history
+  - Feature access flags
+
+- **Projects**
+  - Project metadata
+  - User/team associations
+  - Resource usage tracking
+
+- **Teams**
+  - Team members
+  - Role assignments
+  - Associated projects
+  - Billing relationship
+
+- **ApiUsage**
+  - Rate limiting data
+  - Usage tracking
+  - Time-based analytics
+
+### 7. API Endpoints Overview
+
+The API will follow RESTful principles with these core endpoints:
+
+- **/auth**: Authentication and authorization
+- **/users**: User management operations
+- **/subscriptions**: Subscription operations
+- **/projects**: Project CRUD operations
+- **/teams**: Team management
+- **/payments**: Payment processing and history
+- **/usage**: Usage statistics and reporting
+- **/admin**: Administrative functions
+
+### 8. Development Roadmap
+
+#### Phase 1: Core Infrastructure
+- Basic NestJS setup with MongoDB connection
+- User model and authentication (local strategy)
+- Initial API structure
+
+#### Phase 2: Authentication Expansion
+- OAuth2 providers integration
+- JWT implementation
+- Email verification
+
+#### Phase 3: Subscription Framework
+- Stripe integration
+- Subscription models
+- Payment processing
+
+#### Phase 4: Feature Management
+- Role-based access controls
+- Usage tracking
+- Feature flag implementation
+
+#### Phase 5: Team Management
+- Team creation and management
+- Invitations and permissions
+- Shared resources
+
+#### Phase 6: Advanced Features
+- Analytics and reporting
+- Admin dashboard
+- Enhanced security features
+
+### 9. Deployment Considerations
+
+- **Containerization**: Docker for consistent environments
+- **CI/CD**: GitHub Actions or GitLab CI
+- **Hosting Options**: 
+  - AWS (ECS, Fargate, Lambda)
+  - Google Cloud (Cloud Run, GKE)
+  - Azure (App Service, AKS)
+  - Digital Ocean (App Platform)
+- **Database Hosting**: MongoDB Atlas or self-hosted
+- **Caching Layer**: Redis for performance optimization
+
+### 10. Security Implementation
+
+- **Data Encryption**: Both at rest and in transit
+- **Input Validation**: Protection against injection attacks
+- **Rate Limiting**: Prevent abuse and DoS attacks
+- **CSRF Protection**: Security tokens
+- **XSS Prevention**: Content security policies
+- **Audit Logging**: Security event tracking
+- **Regular Dependency Updates**: Vulnerability scanning
+
+### 11. Scalability Planning
+
+- **Horizontal Scaling**: Multiple service instances
+- **Database Sharding**: For high-volume data
+- **Caching Strategy**: Reducing database load
+- **Serverless Options**: For variable workloads
+- **Queue-based Processing**: For long-running tasks
+
+This comprehensive plan provides a complete roadmap for building, deploying, and scaling a SaaS application with robust authentication, subscription management, and feature limitations based on subscription tiers.
