@@ -40,11 +40,12 @@ pnpm add -D @types/node @nestjs/cli typescript ts-node
 - Create user service with CRUD operations
 - Implement user controller
 - Add validation DTOs
+- Add Swagger documentation for all endpoints
 
 **Required packages:**
 
 ```bash
-pnpm add class-validator class-transformer @nestjs/mapped-types
+pnpm add class-validator class-transformer @nestjs/mapped-types @nestjs/swagger
 ```
 
 **Files to create:**
@@ -72,9 +73,13 @@ pnpm add class-validator class-transformer @nestjs/mapped-types
 **Required packages:**
 
 ```bash
-npm install @nestjs/passport @nestjs/jwt passport passport-local passport-jwt bcrypt
-npm install --save-dev @types/passport-local @types/passport-jwt @types/bcrypt
+pnpm add @nestjs/passport @nestjs/jwt passport passport-local passport-jwt bcrypt
+pnpm add -D @types/passport-local @types/passport-jwt @types/bcrypt
 ```
+
+**Additional tasks:**
+- Add Swagger documentation for auth endpoints
+- Implement API security schemes in Swagger
 
 **Files to create:**
 
@@ -94,15 +99,15 @@ npm install --save-dev @types/passport-local @types/passport-jwt @types/bcrypt
 **Tasks:**
 
 - Implement Google OAuth strategy
-- Implement Facebook OAuth strategy
 - Implement GitHub OAuth strategy
+- Implement Facebook OAuth strategy
 - Create unified OAuth flow
 
 **Required packages:**
 
 ```bash
-npm install passport-google-oauth20 passport-facebook passport-github
-npm install --save-dev @types/passport-google-oauth20 @types/passport-facebook @types/passport-github
+pnpm add passport-google-oauth20 passport-facebook passport-github
+pnpm add -D @types/passport-google-oauth20 @types/passport-facebook @types/passport-github
 ```
 
 **Files to create:**
@@ -125,6 +130,10 @@ npm install --save-dev @types/passport-google-oauth20 @types/passport-facebook @
 - Implement subscription repository
 - Create subscription service
 - Add subscription controller
+
+**Additional tasks:**
+- Document subscription endpoints with Swagger
+- Add API response examples for subscription statuses
 
 **Files to create:**
 
@@ -152,8 +161,12 @@ npm install --save-dev @types/passport-google-oauth20 @types/passport-facebook @
 **Required packages:**
 
 ```bash
-npm install stripe
+pnpm add stripe
 ```
+
+**Additional tasks:**
+- Add Swagger documentation for payment endpoints
+- Include webhook documentation
 
 **Files to create:**
 
@@ -178,7 +191,7 @@ npm install stripe
 **Required packages:**
 
 ```bash
-npm install @nestjs/throttler
+pnpm add @nestjs/throttler
 ```
 
 **Files to create:**
@@ -198,9 +211,13 @@ npm install @nestjs/throttler
 
 - Create project schema
 - Implement project repository
-- Create project service with CRUD
+- Create project service with CRUD operations
 - Add project controller
 - Implement project limitations based on subscription
+
+**Additional tasks:**
+- Add comprehensive Swagger documentation for project CRUD operations
+- Include project relationship examples in API docs
 
 **Files to create:**
 
@@ -208,9 +225,9 @@ npm install @nestjs/throttler
 - src/projects/dto/create-project.dto.ts
 - src/projects/dto/update-project.dto.ts
 - src/projects/projects.repository.ts
-- src/projects.projects.service.ts
-- src/projects.projects.controller.ts
-- src/projects.projects.module.ts
+- src/projects/projects.service.ts
+- src/projects/projects.controller.ts
+- src/projects/projects.module.ts
 - src/projects/guards/project-limit.guard.ts
 
 ## Part 9: Team Management
@@ -229,9 +246,13 @@ npm install @nestjs/throttler
 **Required packages:**
 
 ```bash
-npm install uuid
-npm install --save-dev @types/uuid
+pnpm add uuid
+pnpm add -D @types/uuid
 ```
+
+**Additional tasks:**
+- Document team management API with Swagger
+- Add team member invitation flow documentation
 
 **Files to create:**
 
@@ -262,8 +283,8 @@ npm install --save-dev @types/uuid
 **Required packages:**
 
 ```bash
-npm install @nestjs-modules/mailer nodemailer handlebars
-npm install --save-dev @types/nodemailer
+pnpm add @nestjs-modules/mailer nodemailer handlebars
+pnpm add -D @types/nodemailer
 ```
 
 **Files to create:**
@@ -323,7 +344,7 @@ npm install --save-dev @types/nodemailer
 
 **Tasks:**
 
-- Implement CSRF protection
+- Implement CSRF protections
 - Set up rate limiting
 - Add request validation pipe
 - Implement IP blocking
@@ -332,7 +353,7 @@ npm install --save-dev @types/nodemailer
 **Required packages:**
 
 ```bash
-npm install helmet csurf express-rate-limit
+pnpm add helmet csurf express-rate-limit
 ```
 
 **Files to create:**
@@ -352,14 +373,16 @@ npm install helmet csurf express-rate-limit
 - Write unit tests for core services
 - Create integration tests
 - Set up E2E testing
-- Generate API documentation
+- Generate comprehensive API documentation with Swagger
 - Create user documentation
+- Add Swagger UI customization
+- Include authentication flows in API docs
 
 **Required packages:**
 
 ```bash
-npm install --save-dev jest @nestjs/testing supertest
-npm install @nestjs/swagger swagger-ui-express
+pnpm add -D jest @nestjs/testing supertest
+pnpm add @nestjs/swagger swagger-ui-express
 ```
 
 **Files to create:**
@@ -378,19 +401,19 @@ npm install @nestjs/swagger swagger-ui-express
 
 **Tasks:**
 
-- Create Docker configuration
-- Set up CI/CD pipeline
 - Configure production environment
 - Implement database migrations
+- Set up CI/CD pipeline
+- Create Docker configuration
 - Set up monitoring
 
 **Files to create:**
 
-- Dockerfile
-- docker-compose.yml
-- .github/workflows/ci.yml
-- .github/workflows/deploy.yml
-- src/migrations/migration.service.ts
 - src/health/health.controller.ts
+- src/migrations/migration.service.ts
+- .github/workflows/deploy.yml
+- .github/workflows/ci.yml
+- docker-compose.yml
+- Dockerfile
 
 Each part is designed to be implemented incrementally, with each building upon the previous parts. This approach allows for methodical development without overwhelming complexity, while ensuring that each part stays within API limits during implementation.
