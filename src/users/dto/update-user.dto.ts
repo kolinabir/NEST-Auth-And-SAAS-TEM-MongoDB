@@ -4,17 +4,17 @@ import { CreateUserDto } from './create-user.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'User preferences',
     type: 'object',
     example: { theme: 'dark', notifications: true },
-    additionalProperties: true
+    additionalProperties: true,
   })
   @IsOptional()
   @IsObject()
   preferences?: Record<string, any>;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'User profile information',
     type: 'object',
     example: {
@@ -23,9 +23,9 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
       location: 'New York',
       company: 'Tech Corp',
       website: 'https://johndoe.com',
-      phone: '+1234567890'
+      phone: '+1234567890',
     },
-    additionalProperties: true
+    additionalProperties: true,
   })
   @IsOptional()
   @IsObject()
@@ -38,18 +38,18 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
     phone?: string;
   };
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Email verification status',
     type: 'boolean',
-    example: true
+    example: true,
   })
   @IsOptional()
   @IsBoolean()
   emailVerified?: boolean;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Email verification token',
-    type: 'string'
+    type: 'string',
   })
   @IsOptional()
   @IsString()

@@ -14,7 +14,7 @@ async function bootstrap() {
   // Get config service
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port', 3000);
-  
+
   // Enable validation pipe globally
   app.useGlobalPipes(
     new ValidationPipe({
@@ -26,28 +26,32 @@ async function bootstrap() {
 
   // Use Pino logger
   app.useLogger(app.get(Logger));
-  
+
   // Enable CORS
   app.enableCors();
 
   // Setup Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('SaaS Template API')
-    .setDescription('The API documentation for SaaS Template with Authentication and Subscription Management')
+    .setDescription(
+      'The API documentation for SaaS Template with Authentication and Subscription Management',
+    )
     .setVersion('1.0')
     .addTag('users', 'User management operations')
     .addTag('auth', 'Authentication operations')
     .addTag('subscriptions', 'Subscription management')
     .addBearerAuth()
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
   // Start the application
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
-  console.log(`Swagger documentation available at: http://localhost:${port}/api/docs`);
+  console.log(
+    `Swagger documentation available at: http://localhost:${port}/api/docs`,
+  );
 }
 
 bootstrap();

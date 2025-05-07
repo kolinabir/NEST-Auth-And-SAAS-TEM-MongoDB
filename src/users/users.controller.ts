@@ -14,18 +14,18 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDocument } from './schemas/user.schema';
 import { PaginatedResponse } from '../common/interfaces/base.interface';
-import { 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse, 
-  ApiParam, 
-  ApiQuery, 
-  ApiBody, 
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+  ApiBody,
   ApiCreatedResponse,
   ApiBadRequestResponse,
   ApiNotFoundResponse,
   ApiUnauthorizedResponse,
-  ApiBearerAuth
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 
 @ApiTags('users')
@@ -36,9 +36,9 @@ export class UsersController {
   @Post()
   @ApiOperation({ summary: 'Create a new user' })
   @ApiBody({ type: CreateUserDto })
-  @ApiCreatedResponse({ 
+  @ApiCreatedResponse({
     description: 'The user has been successfully created.',
-    type: Object
+    type: Object,
   })
   @ApiBadRequestResponse({ description: 'Invalid input data.' })
   async create(@Body() createUserDto: CreateUserDto): Promise<UserDocument> {
@@ -47,17 +47,27 @@ export class UsersController {
 
   @Get()
   @ApiOperation({ summary: 'Get all users with pagination' })
-  @ApiQuery({ name: 'page', required: false, description: 'Page number', type: Number })
-  @ApiQuery({ name: 'limit', required: false, description: 'Items per page', type: Number })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Items per page',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
     description: 'Return all users with pagination',
     schema: {
       type: 'object',
       properties: {
         data: {
           type: 'array',
-          items: { type: 'object' }
+          items: { type: 'object' },
         },
         meta: {
           type: 'object',
@@ -65,11 +75,11 @@ export class UsersController {
             total: { type: 'number' },
             page: { type: 'number' },
             limit: { type: 'number' },
-            totalPages: { type: 'number' }
-          }
-        }
-      }
-    }
+            totalPages: { type: 'number' },
+          },
+        },
+      },
+    },
   })
   async findAll(
     @Query('page') page = 1,
@@ -114,11 +124,21 @@ export class UsersController {
   @Get('subscription/:tier')
   @ApiOperation({ summary: 'Get users by subscription tier' })
   @ApiParam({ name: 'tier', description: 'Subscription tier name' })
-  @ApiQuery({ name: 'page', required: false, description: 'Page number', type: Number })
-  @ApiQuery({ name: 'limit', required: false, description: 'Items per page', type: Number })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Return users by subscription tier with pagination'
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Items per page',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Return users by subscription tier with pagination',
   })
   async findBySubscriptionTier(
     @Param('tier') tier: string,
