@@ -19,9 +19,20 @@ export class PaymentsService {
     private readonly usersService: UsersService,
     private readonly subscriptionsService: SubscriptionsService,
   ) {
-    this.stripe = new Stripe(this.configService.get<string>('stripe.secretKey'), {
-      apiVersion: '2023-10-16',
-    });
+    const stripeKey = this.configService.get<string>('stripe.secretKey');
+    
+    if (!stripeKey) {
+      this.logger.warn('Stripe secret key not found, payment functionality will be limited');
+    }
+    
+    try {
+      this.stripe = new Stripe(stripeKey || 'dummy_key_for_dev', {
+        apiVersion: '2023-10-16',
+      });
+      this.logger.log('Stripe payment service initialized');
+    } catch (error) {
+      this.logger.error(`Failed to initialize Stripe: ${error.message}`);
+    }
   }
 
   /**
