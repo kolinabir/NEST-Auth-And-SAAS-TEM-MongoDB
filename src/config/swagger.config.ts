@@ -11,6 +11,7 @@ export function setupSwagger(app: INestApplication) {
     .addTag('users', 'User management operations')
     .addTag('auth', 'Authentication operations')
     .addTag('subscriptions', 'Subscription management')
+    .addTag('payments', 'Payment processing operations')
     .addBearerAuth({
       type: 'http',
       scheme: 'bearer',
@@ -78,6 +79,29 @@ export function setupSwagger(app: INestApplication) {
           type: 'string',
           example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         },
+      },
+    },
+    CheckoutSession: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        sessionId: { type: 'string', example: 'cs_test_a1b2c3d4e5f6g7h8i9j0' },
+        url: { type: 'string', example: 'https://checkout.stripe.com/c/pay/cs_test_a1b2c3d4e5f6g7h8i9j0' },
+      },
+    },
+    CustomerPortalSession: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        url: { type: 'string', example: 'https://billing.stripe.com/p/session/cs_test_a1b2c3d4e5f6g7h8i9j0' },
+      },
+    },
+    CancelSubscription: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        canceled: { type: 'boolean', example: false },
+        canceledAtPeriodEnd: { type: 'boolean', example: true },
       },
     },
   };

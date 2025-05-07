@@ -7,17 +7,33 @@ import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import { setupSwagger } from './config/swagger.config';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
-  // Create the NestJS application
+  // Create the NestJS application with rawBody support for webhooks
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
+    bodyParser: false, // Disable built-in bodyParser to use custom one
   });
 
   // Get config service
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port', 3000);
   const isProduction = process.env.NODE_ENV === 'production';
+
+  // Configure body parser with raw body support for webhooks
+  app.use(
+    bodyParser.json({
+      verify: (req: any, res, buf) => {
+        if (req.url.startsWith('/payments/webhook')) {
+          req.rawBody = buf;
+        }
+      },
+    }),
+  );
+
+  // Parse URL-encoded data
+  app.use(bodyParser.urlencoded({ extended: true }));
 
   // Enable validation pipe globally
   app.useGlobalPipes(

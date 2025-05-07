@@ -8,13 +8,15 @@ import appConfig from './config/app.config';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { PaymentsModule } from './payments/payments.module';
+import stripeConfig from './config/stripe.config';
 
 @Module({
   imports: [
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig],
+      load: [appConfig, databaseConfig, stripeConfig],
       envFilePath: ['.env'],
     }),
 
@@ -56,6 +58,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
     AuthModule,
     AdminModule,
     SubscriptionsModule,
+    PaymentsModule,
   ],
   controllers: [],
   providers: [],

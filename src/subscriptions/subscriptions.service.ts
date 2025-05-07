@@ -152,4 +152,8 @@ export class SubscriptionsService {
       details: SubscriptionFeatures,
     };
   }
+
+  async findByExternalId(externalId: string): Promise<SubscriptionDocument | null> {
+    return this.subscriptionsRepository.findByExternalId(externalId);
+  }
 }
