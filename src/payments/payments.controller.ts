@@ -1,36 +1,26 @@
-import { 
-  Controller, 
-  Post, 
-  Body, 
-  UseGuards, 
-  Request, 
-  BadRequestException,
-  Headers,
-  Param,
-  ForbiddenException,
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
   Get,
   Query,
-  Req,
+  Param,
+  Headers,
   HttpCode,
-  RawBodyRequest,
+  Req,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
-import { PaymentsService } from './payments.service';
-import { CreatePaymentDto } from './dto/create-payment.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiParam, ApiQuery, ApiHeader } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/schemas/user.schema';
 import { Public } from '../auth/decorators/public.decorator';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiBody,
-  ApiHeader,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { PaymentsService } from './payments.service';
+import { CreatePaymentDto } from './dto/create-payment.dto';
 
 @ApiTags('payments')
 @ApiBearerAuth()
@@ -44,10 +34,7 @@ export class PaymentsController {
   @ApiBody({ type: CreatePaymentDto })
   @ApiResponse({ status: 200, description: 'Returns checkout session URL' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
-  async createCheckoutSession(
-    @Body() createPaymentDto: CreatePaymentDto,
-    @Request() req,
-  ) {
+  async createCheckoutSession(@Body() createPaymentDto: CreatePaymentDto, @Request() req) {
     // Ensure user can only create payment for themselves unless they're an admin
     if (req.user.role !== UserRole.ADMIN && createPaymentDto.userId !== req.user.id) {
       throw new ForbiddenException('You can only create payments for your own account');
@@ -60,17 +47,10 @@ export class PaymentsController {
   @Post('webhook')
   @HttpCode(200)
   @ApiOperation({ summary: 'Handle Stripe webhook events' })
-  @ApiHeader({
-    name: 'stripe-signature',
-    description: 'Stripe webhook signature',
-    required: true,
-  })
+  @ApiHeader({ name: 'stripe-signature', description: 'Stripe webhook signature', required: true })
   @ApiResponse({ status: 200, description: 'Webhook received and processed' })
   @ApiResponse({ status: 400, description: 'Invalid webhook signature' })
-  async handleWebhook(
-    @Headers('stripe-signature') signature: string,
-    @Req() request: RawBodyRequest<Request>,
-  ) {
+  async handleWebhook(@Headers('stripe-signature') signature: string, @Req() request: any) {
     if (!signature) {
       throw new BadRequestException('Missing stripe-signature header');
     }
