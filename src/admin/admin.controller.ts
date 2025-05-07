@@ -266,7 +266,10 @@ export class AdminController {
 
   @Get('oauth/providers/:provider')
   @ApiOperation({ summary: 'Get specific OAuth provider configuration' })
-  @ApiParam({ name: 'provider', description: 'Provider name (google, facebook, github)' })
+  @ApiParam({
+    name: 'provider',
+    description: 'Provider name (google, facebook, github)',
+  })
   @ApiResponse({ status: 200, description: 'Returns provider configuration' })
   @ApiResponse({ status: 404, description: 'Provider not found' })
   async getOAuthProvider(@Param('provider') provider: string) {
@@ -275,7 +278,10 @@ export class AdminController {
 
   @Put('oauth/providers/:provider')
   @ApiOperation({ summary: 'Update OAuth provider configuration' })
-  @ApiParam({ name: 'provider', description: 'Provider name (google, facebook, github)' })
+  @ApiParam({
+    name: 'provider',
+    description: 'Provider name (google, facebook, github)',
+  })
   @ApiBody({ type: OAuthProviderConfigDto })
   @ApiResponse({ status: 200, description: 'Provider configuration updated' })
   async updateOAuthProvider(

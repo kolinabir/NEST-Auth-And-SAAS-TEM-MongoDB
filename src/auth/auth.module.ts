@@ -52,7 +52,9 @@ import * as passport from 'passport';
     {
       provide: FacebookStrategy,
       useFactory: (configService: ConfigService, authService: AuthService) => {
-        const enabled = configService.get<boolean>('app.oauth.facebook.enabled');
+        const enabled = configService.get<boolean>(
+          'app.oauth.facebook.enabled',
+        );
         if (!enabled) {
           return {};
         }
@@ -85,7 +87,7 @@ import * as passport from 'passport';
         passport.serializeUser((user: any, done) => {
           done(null, user.id);
         });
-        
+
         passport.deserializeUser(async (id: string, done) => {
           try {
             const user = await authService['usersService'].findById(id);

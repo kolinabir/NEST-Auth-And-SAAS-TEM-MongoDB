@@ -201,7 +201,10 @@ export class AuthController {
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Initiate Google OAuth authentication flow' })
-  @ApiResponse({ status: 302, description: 'Redirects to Google authentication' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to Google authentication',
+  })
   async googleAuth() {
     // Guard redirects to Google
   }
@@ -210,21 +213,29 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Handle Google OAuth callback' })
-  @ApiResponse({ status: 302, description: 'Redirects to frontend after authentication' })
-  async googleAuthCallback(@Request() req, @Res({ passthrough: true }) response: Response) {
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to frontend after authentication',
+  })
+  async googleAuthCallback(
+    @Request() req,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     try {
       // Generate tokens for the authenticated user
       const tokens = await this.authService.generateTokens(req.user);
-      
+
       // Set cookies
       this.authService.setTokenCookies(response, tokens);
-      
+
       // Redirect to frontend
       const frontendUrl = this.configService.get<string>('app.frontendUrl');
       response.redirect(`${frontendUrl}/auth/success`);
     } catch (error) {
       const frontendUrl = this.configService.get<string>('app.frontendUrl');
-      response.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`);
+      response.redirect(
+        `${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`,
+      );
     }
   }
 
@@ -233,7 +244,10 @@ export class AuthController {
   @Get('facebook')
   @UseGuards(FacebookAuthGuard)
   @ApiOperation({ summary: 'Initiate Facebook OAuth authentication flow' })
-  @ApiResponse({ status: 302, description: 'Redirects to Facebook authentication' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to Facebook authentication',
+  })
   async facebookAuth() {
     // Guard redirects to Facebook
   }
@@ -242,8 +256,14 @@ export class AuthController {
   @Get('facebook/callback')
   @UseGuards(FacebookAuthGuard)
   @ApiOperation({ summary: 'Handle Facebook OAuth callback' })
-  @ApiResponse({ status: 302, description: 'Redirects to frontend after authentication' })
-  async facebookAuthCallback(@Request() req, @Res({ passthrough: true }) response: Response) {
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to frontend after authentication',
+  })
+  async facebookAuthCallback(
+    @Request() req,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     try {
       const tokens = await this.authService.generateTokens(req.user);
       this.authService.setTokenCookies(response, tokens);
@@ -251,7 +271,9 @@ export class AuthController {
       response.redirect(`${frontendUrl}/auth/success`);
     } catch (error) {
       const frontendUrl = this.configService.get<string>('app.frontendUrl');
-      response.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`);
+      response.redirect(
+        `${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`,
+      );
     }
   }
 
@@ -260,7 +282,10 @@ export class AuthController {
   @Get('github')
   @UseGuards(GithubAuthGuard)
   @ApiOperation({ summary: 'Initiate GitHub OAuth authentication flow' })
-  @ApiResponse({ status: 302, description: 'Redirects to GitHub authentication' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to GitHub authentication',
+  })
   async githubAuth() {
     // Guard redirects to GitHub
   }
@@ -269,8 +294,14 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(GithubAuthGuard)
   @ApiOperation({ summary: 'Handle GitHub OAuth callback' })
-  @ApiResponse({ status: 302, description: 'Redirects to frontend after authentication' })
-  async githubAuthCallback(@Request() req, @Res({ passthrough: true }) response: Response) {
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to frontend after authentication',
+  })
+  async githubAuthCallback(
+    @Request() req,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     try {
       const tokens = await this.authService.generateTokens(req.user);
       this.authService.setTokenCookies(response, tokens);
@@ -278,7 +309,9 @@ export class AuthController {
       response.redirect(`${frontendUrl}/auth/success`);
     } catch (error) {
       const frontendUrl = this.configService.get<string>('app.frontendUrl');
-      response.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`);
+      response.redirect(
+        `${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`,
+      );
     }
   }
 

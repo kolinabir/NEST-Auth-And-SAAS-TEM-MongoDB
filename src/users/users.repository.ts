@@ -97,7 +97,10 @@ export class UsersRepository implements BaseRepository<UserDocument> {
     return this.paginate(page, limit, { subscriptionTier: tier });
   }
 
-  async findByProviderId(provider: string, providerId: string): Promise<UserDocument | null> {
+  async findByProviderId(
+    provider: string,
+    providerId: string,
+  ): Promise<UserDocument | null> {
     const query = {};
     query[`providerData.${provider}.id`] = providerId;
     return this.userModel.findOne(query).exec();

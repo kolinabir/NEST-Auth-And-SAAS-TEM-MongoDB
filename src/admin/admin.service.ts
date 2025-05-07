@@ -133,7 +133,10 @@ export class AdminService {
     return { provider, enabled: true };
   }
 
-  async updateOAuthProvider(provider: string, configDto: OAuthProviderConfigDto) {
+  async updateOAuthProvider(
+    provider: string,
+    configDto: OAuthProviderConfigDto,
+  ) {
     // Implementation will be added later
     return { ...configDto, updated: true };
   }
