@@ -6,6 +6,7 @@ import databaseConfig from './config/database.config';
 import { UsersModule } from './users/users.module';
 import appConfig from './config/app.config';
 import { AuthModule } from './auth/auth.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AuthModule } from './auth/auth.module';
     // Feature modules
     UsersModule,
     AuthModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [],

@@ -96,6 +96,41 @@ pnpm add -D @types/passport-local @types/passport-jwt @types/bcrypt @types/cooki
 - src/auth/auth.controller.ts
 - src/auth/auth.module.ts
 
+## Part 3.5: Admin Module Foundation
+
+**Estimated time: 3-4 hours**
+
+**Tasks:**
+- Create admin module structure
+- Implement role-based access control
+- Add admin guard
+- Create base admin controller with Swagger documentation
+- Implement admin user management basics
+- Set up admin service foundations
+
+**Required packages:**
+```bash
+pnpm add csv-writer xlsx multer
+pnpm add -D @types/multer
+```
+
+**Files to create:**
+- src/admin/admin.module.ts
+- src/admin/admin.service.ts
+- src/admin/admin.controller.ts
+- src/admin/guards/admin-only.guard.ts
+- src/admin/dto/admin-user-update.dto.ts
+- src/admin/entities/admin-activity.entity.ts
+- src/admin/interceptors/admin-activity.interceptor.ts
+
+**Admin Swagger Configuration:**
+```typescript
+@ApiTags('Admin Controls')
+@ApiBearerAuth()
+@UseGuards(AdminOnlyGuard)
+@Controller('admin')
+```
+
 ## Part 4: Authentication - OAuth Strategies
 
 **Estimated time: 3-4 hours**
@@ -122,6 +157,15 @@ pnpm add -D @types/passport-google-oauth20 @types/passport-facebook @types/passp
 - src/auth/guards/google-auth.guard.ts
 - src/auth/guards/facebook-auth.guard.ts
 - src/auth/guards/github-auth.guard.ts
+
+**Additional admin tasks:**
+- Add OAuth provider management in admin panel
+- Create admin endpoints for enabling/disabling OAuth providers
+- Add analytics for OAuth usage
+
+**Additional files:**
+- src/admin/dto/oauth-provider-config.dto.ts
+- src/admin/endpoints for OAuth management
 
 ## Part 5: Subscription Model
 
@@ -150,6 +194,17 @@ pnpm add -D @types/passport-google-oauth20 @types/passport-facebook @types/passp
 - src/subscriptions/subscriptions.controller.ts
 - src/subscriptions/subscriptions.module.ts
 - src/subscriptions/enums/subscription-tier.enum.ts
+
+**Additional admin tasks:**
+- Create subscription management endpoints for admins
+- Implement manual subscription override functionality
+- Add subscription cancellation and refund capabilities
+- Create subscription analytics dashboards
+
+**Additional files:**
+- src/admin/dto/admin-subscription-update.dto.ts
+- src/admin/dto/subscription-cancel.dto.ts
+- src/admin/dto/subscription-refund.dto.ts
 
 ## Part 6: Payment Integration with Stripe
 
@@ -183,6 +238,17 @@ pnpm add stripe
 - src/payments/dto/webhook-event.dto.ts
 - src/payments/interfaces/stripe-event.interface.ts
 
+**Additional admin tasks:**
+- Add payment management capabilities
+- Implement refund processing
+- Create payment dispute handling
+- Add financial reporting dashboard
+
+**Additional files:**
+- src/admin/dto/process-refund.dto.ts
+- src/admin/dto/handle-dispute.dto.ts
+- src/admin/dto/financial-report-query.dto.ts
+
 ## Part 7: Feature Limitation System
 
 **Estimated time: 3-4 hours**
@@ -208,6 +274,17 @@ pnpm add @nestjs/throttler
 - src/features/guards/subscription-feature.guard.ts
 - src/features/decorators/require-subscription.decorator.ts
 - src/common/config/features.config.ts
+
+**Additional admin tasks:**
+- Create feature flag management interface
+- Implement per-user feature overrides
+- Add usage limit adjustment capabilities
+- Create feature usage analytics
+
+**Additional files:**
+- src/admin/dto/feature-flag-update.dto.ts
+- src/admin/dto/user-feature-override.dto.ts
+- src/admin/dto/usage-limit-adjustment.dto.ts
 
 ## Part 8: Project Management
 
@@ -236,6 +313,17 @@ pnpm add @nestjs/throttler
 - src/projects.projects.controller.ts
 - src/projects.projects.module.ts
 - src/projects/guards/project-limit.guard.ts
+
+**Additional admin tasks:**
+- Add project moderation capabilities
+- Implement project transfer between users
+- Create project templates management
+- Add project analytics dashboard
+
+**Additional files:**
+- src/admin/dto/project-moderation.dto.ts
+- src/admin/dto/project-transfer.dto.ts
+- src/admin/dto/project-template.dto.ts
 
 ## Part 9: Team Management
 
@@ -274,6 +362,17 @@ pnpm add -D @types/uuid
 - src/teams/teams.module.ts
 - src/teams/guards/team-member-limit.guard.ts
 
+**Additional admin tasks:**
+- Add team moderation capabilities
+- Implement team member management
+- Create organization verification system
+- Add team analytics dashboard
+
+**Additional files:**
+- src/admin/dto/team-moderation.dto.ts
+- src/admin/dto/team-verification.dto.ts
+- src/admin/dto/team-member-manage.dto.ts
+
 ## Part 10: Email Notifications
 
 **Estimated time: 3-4 hours**
@@ -304,6 +403,17 @@ pnpm add -D @types/nodemailer
 - src/emails/templates/team-invite.hbs
 - src/emails/templates/subscription-update.hbs
 
+**Additional admin tasks:**
+- Create email template management system
+- Implement broadcast email capabilities
+- Add email delivery analytics
+- Create email blacklist management
+
+**Additional files:**
+- src/admin/dto/email-template-update.dto.ts
+- src/admin/dto/broadcast-email.dto.ts
+- src/admin/dto/email-blacklist.dto.ts
+
 ## Part 11: API Usage Tracking
 
 **Estimated time: 3-4 hours**
@@ -325,26 +435,57 @@ pnpm add -D @types/nodemailer
 - src/usage/middleware/usage-tracking.middleware.ts
 - src/usage/dto/usage-stats.dto.ts
 
-## Part 12: Admin Module
+**Additional admin tasks:**
+- Create comprehensive API analytics dashboard
+- Implement rate limit adjustment for specific users
+- Add API abuse detection and mitigation
+- Create API endpoint performance monitoring
+
+**Additional files:**
+- src/admin/dto/rate-limit-adjustment.dto.ts
+- src/admin/dto/api-abuse-rule.dto.ts
+- src/admin/dto/endpoint-monitoring.dto.ts
+
+## Part 12: Admin Module Expansion
 
 **Estimated time: 4-5 hours**
 
 **Tasks:**
-
-- Create admin-only endpoints
-- Implement user management for admins
-- Add subscription management tools
-- Create system statistics dashboard
+- Expand user management capabilities
+  - User blocking/unblocking functionality
+  - User role management
+  - Bulk user operations
+  - User audit logging
+  - Account verification override
+- Enhance subscription management tools
+  - Manual subscription override
+  - Force subscription upgrades/downgrades
+  - Add subscription credits/extensions
+  - Handle subscription disputes
+- Create comprehensive system statistics dashboard
+  - User growth metrics
+  - Revenue analytics
+  - Subscription conversion rates
+  - Activity heatmaps
+  - Geographic distribution
 - Implement user impersonation for support
+- Add content moderation tools
+- Create system-wide announcement system
+- Implement database backup scheduling
 
 **Files to create:**
-
-- src/admin/admin.service.ts
-- src/admin/admin.controller.ts
-- src/admin/admin.module.ts
-- src/admin/guards/admin-only.guard.ts
-- src/admin/dto/admin-user-update.dto.ts
-- src/admin/dto/admin-subscription-update.dto.ts
+- src/admin/dto/block-user.dto.ts
+- src/admin/dto/user-role-update.dto.ts
+- src/admin/dto/user-search.dto.ts
+- src/admin/dto/export-users.dto.ts
+- src/admin/dto/analytics-query.dto.ts
+- src/admin/dto/admin-notification.dto.ts
+- src/admin/dto/content-moderation.dto.ts
+- src/admin/dto/system-announcement.dto.ts
+- src/admin/dto/backup-schedule.dto.ts
+- src/admin/services/admin-analytics.service.ts
+- src/admin/services/admin-moderation.service.ts
+- src/admin/services/admin-notification.service.ts
 
 ## Part 13: Security Enhancements
 
@@ -371,6 +512,17 @@ pnpm add helmet csurf express-rate-limit
 - src/security/guards/rate-limit.guard.ts
 - src/security/filters/all-exceptions.filter.ts
 - src/security/dto/security-log.dto.ts
+
+**Additional admin tasks:**
+- Create security audit logging and alerts
+- Implement suspicious activity detection
+- Add IP blocking management
+- Create security policy management
+
+**Additional files:**
+- src/admin/dto/ip-block.dto.ts
+- src/admin/dto/security-policy.dto.ts
+- src/admin/dto/security-alert-config.dto.ts
 
 ## Part 14: Testing and Documentation
 
@@ -403,6 +555,15 @@ pnpm add @nestjs/swagger swagger-ui-express
 - docs/api.md
 - docs/user-guide.md
 
+**Additional admin tasks:**
+- Create comprehensive admin API documentation
+- Add detailed examples for admin operations
+- Implement admin permission testing
+
+**Additional files:**
+- docs/admin-api.md
+- test/admin.e2e-spec.ts
+
 ## Part 15: Deployment Preparation
 
 **Estimated time: 3-4 hours**
@@ -423,5 +584,15 @@ pnpm add @nestjs/swagger swagger-ui-express
 - .github/workflows/ci.yml
 - docker-compose.yml
 - Dockerfile
+
+**Additional admin tasks:**
+- Create system health monitoring dashboard
+- Implement performance analytics
+- Add deployment and scaling management
+- Create database maintenance tools
+
+**Additional files:**
+- src/admin/dto/system-maintenance.dto.ts
+- src/admin/dto/performance-tuning.dto.ts
 
 Each part is designed to be implemented incrementally, with each building upon the previous parts. This approach allows for methodical development without overwhelming complexity, while ensuring that each part stays within API limits during implementation.

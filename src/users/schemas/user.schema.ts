@@ -80,6 +80,9 @@ export class User {
     phone?: string;
   };
 
+  @Prop({ default: false })
+  blocked: boolean;
+
   // Authentication methods
   @Prop({ type: [String], default: [] })
   authMethods: string[]; // 'local', 'google', 'facebook', 'github'
