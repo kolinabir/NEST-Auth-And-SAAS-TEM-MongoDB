@@ -29,11 +29,11 @@ import {
 } from '@nestjs/swagger';
 import { Roles } from './decorators/roles.decorator';
 import { UserRole } from '../users/schemas/user.schema';
-import { RolesGuard } from './guards/roles.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { FacebookAuthGuard } from './guards/facebook-auth.guard';
 import { GithubAuthGuard } from './guards/github-auth.guard';
 import { ConfigService } from '@nestjs/config';
+import { RolesGuard } from './guards/roles.guard';
 
 class RefreshTokenDto {
   @ApiProperty({
