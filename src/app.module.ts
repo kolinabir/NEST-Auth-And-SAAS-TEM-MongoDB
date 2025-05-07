@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import appConfig from './config/app.config';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { AdminModule } from './admin/admin.module';
     UsersModule,
     AuthModule,
     AdminModule,
+    SubscriptionsModule,
   ],
   controllers: [],
   providers: [],
