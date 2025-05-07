@@ -5,6 +5,7 @@ import { LoggerModule } from 'nestjs-pino';
 import databaseConfig from './config/database.config';
 import { UsersModule } from './users/users.module';
 import appConfig from './config/app.config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import appConfig from './config/app.config';
 
     // Feature modules
     UsersModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsOptional, IsObject, IsBoolean, IsString } from 'class-validator';
+import { IsOptional, IsObject, IsBoolean, IsString, IsDate } from 'class-validator';
 import { CreateUserDto } from './create-user.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -54,4 +54,13 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsOptional()
   @IsString()
   emailVerificationToken?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Last login date',
+    type: Date,
+    example: new Date()
+  })
+  @IsOptional()
+  @IsDate()
+  lastLogin?: Date;
 }

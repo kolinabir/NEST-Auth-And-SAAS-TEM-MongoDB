@@ -1,11 +1,4 @@
-import {
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength, IsArray } from 'class-validator';
 import { SubscriptionTier, UserRole } from '../schemas/user.schema';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -72,4 +65,14 @@ export class CreateUserDto {
   })
   @IsOptional()
   providerData?: Record<string, any>;
+
+  @ApiPropertyOptional({ 
+    description: 'Authentication methods',
+    type: [String],
+    example: ['local'],
+    isArray: true
+  })
+  @IsOptional()
+  @IsArray()
+  authMethods?: string[];
 }
