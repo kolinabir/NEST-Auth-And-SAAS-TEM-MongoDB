@@ -34,10 +34,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException('User no longer exists');
     }
-    
+
     // Update lastLogin time - now properly typed in UpdateUserDto
     await this.usersService.update(user.id, { lastLogin: new Date() });
-    
+
     // Return user without sensitive data
     return {
       id: user.id,

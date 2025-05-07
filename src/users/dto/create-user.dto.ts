@@ -77,9 +77,9 @@ export class CreateUserDto {
       accessToken: 'ya29.a0AfB_byC...',
       profile: {
         name: 'John Doe',
-        email: 'john.doe@gmail.com'
-      }
-    }
+        email: 'john.doe@gmail.com',
+      },
+    },
   })
   @IsOptional()
   providerData?: Record<string, any>;
@@ -89,7 +89,7 @@ export class CreateUserDto {
     example: ['local', 'google'],
     isArray: true,
     type: [String],
-    enum: ['local', 'google', 'facebook', 'github']
+    enum: ['local', 'google', 'facebook', 'github'],
   })
   @IsOptional()
   @IsArray()

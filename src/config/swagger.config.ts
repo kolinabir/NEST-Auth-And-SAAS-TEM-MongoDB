@@ -4,7 +4,9 @@ import { INestApplication } from '@nestjs/common';
 export function setupSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
     .setTitle('SaaS Template API')
-    .setDescription('The API documentation for SaaS Template with Authentication and Subscription Management')
+    .setDescription(
+      'The API documentation for SaaS Template with Authentication and Subscription Management',
+    )
     .setVersion('1.0')
     .addTag('users', 'User management operations')
     .addTag('auth', 'Authentication operations')
@@ -23,9 +25,9 @@ export function setupSwagger(app: INestApplication) {
       name: 'refresh_token',
     })
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
-  
+
   // Add custom examples and improve schema
   document.components.schemas = {
     ...document.components.schemas,
@@ -37,33 +39,49 @@ export function setupSwagger(app: INestApplication) {
         lastName: { type: 'string', example: 'Doe' },
         email: { type: 'string', example: 'john.doe@example.com' },
         role: { type: 'string', enum: ['user', 'admin'], example: 'user' },
-        subscriptionTier: { 
-          type: 'string', 
-          enum: ['free', 'starter', 'professional', 'enterprise'], 
-          example: 'starter' 
+        subscriptionTier: {
+          type: 'string',
+          enum: ['free', 'starter', 'professional', 'enterprise'],
+          example: 'starter',
         },
         emailVerified: { type: 'boolean', example: true },
-        lastLogin: { type: 'string', format: 'date-time', example: '2023-05-07T12:00:00Z' },
+        lastLogin: {
+          type: 'string',
+          format: 'date-time',
+          example: '2023-05-07T12:00:00Z',
+        },
         profile: {
           type: 'object',
           properties: {
-            avatar: { type: 'string', example: 'https://example.com/avatar.jpg' },
-            bio: { type: 'string', example: 'Software Engineer with 5+ years experience' },
+            avatar: {
+              type: 'string',
+              example: 'https://example.com/avatar.jpg',
+            },
+            bio: {
+              type: 'string',
+              example: 'Software Engineer with 5+ years experience',
+            },
             company: { type: 'string', example: 'Tech Solutions Inc.' },
-          }
+          },
         },
-      }
+      },
     },
     AuthResponse: {
       type: 'object',
       properties: {
         user: { $ref: '#/components/schemas/User' },
-        accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-        refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-      }
-    }
+        accessToken: {
+          type: 'string',
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        },
+        refreshToken: {
+          type: 'string',
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        },
+      },
+    },
   };
-  
+
   SwaggerModule.setup('api/docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,

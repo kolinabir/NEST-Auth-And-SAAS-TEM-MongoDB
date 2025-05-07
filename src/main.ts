@@ -18,19 +18,19 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port', 3000);
   const isProduction = process.env.NODE_ENV === 'production';
-  
+
   // Enable validation pipe globally
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      transform: true, 
+      transform: true,
       forbidNonWhitelisted: true,
     }),
   );
 
   // Use Pino logger
   app.useLogger(app.get(Logger));
-  
+
   // Enable CORS with credentials
   app.enableCors({
     origin: configService.get('app.frontendUrl'),
@@ -39,7 +39,7 @@ async function bootstrap() {
 
   // Add cookie parser middleware
   app.use(cookieParser());
-  
+
   // Setup session
   app.use(
     session({
@@ -54,7 +54,7 @@ async function bootstrap() {
       },
     }),
   );
-  
+
   // Initialize Passport and session
   app.use(passport.initialize());
   app.use(passport.session());

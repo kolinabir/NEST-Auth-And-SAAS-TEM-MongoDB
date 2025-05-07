@@ -13,7 +13,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 @Module({
   imports: [
     UsersModule,
-    PassportModule.register({ 
+    PassportModule.register({
       session: true,
       defaultStrategy: 'jwt',
     }),

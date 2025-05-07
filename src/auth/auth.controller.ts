@@ -28,7 +28,8 @@ import { Response } from 'express';
 class RefreshTokenDto {
   @ApiProperty({
     description: 'Refresh token',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGQyMWI0NjY3ZDBkODk5MmU2MTBjODUiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwiaWF0IjoxNjMwMDAwMDAwLCJleHAiOjE2MzAwMDM2MDB9.wNqR9UDA_TPCRCwQJA8mH3r_awGulIglFcITIqG8jzM',
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGQyMWI0NjY3ZDBkODk5MmU2MTBjODUiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwiaWF0IjoxNjMwMDAwMDAwLCJleHAiOjE2MzAwMDM2MDB9.wNqR9UDA_TPCRCwQJA8mH3r_awGulIglFcITIqG8jzM',
   })
   refreshToken: string;
 }
@@ -43,16 +44,16 @@ export class AuthController {
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'User successfully registered.',
     schema: {
       type: 'object',
       properties: {
         message: { type: 'string', example: 'User registered successfully' },
-        userId: { type: 'string', example: '60d21b4667d0d8992e610c85' }
-      }
-    }
+        userId: { type: 'string', example: '60d21b4667d0d8992e610c85' },
+      },
+    },
   })
   @ApiResponse({
     status: 400,
@@ -62,9 +63,9 @@ export class AuthController {
       properties: {
         statusCode: { type: 'number', example: 400 },
         message: { type: 'string', example: 'Email already registered' },
-        error: { type: 'string', example: 'Bad Request' }
-      }
-    }
+        error: { type: 'string', example: 'Bad Request' },
+      },
+    },
   })
   async register(@Body() registerDto: RegisterDto) {
     const user = await this.authService.register(registerDto);
@@ -75,8 +76,8 @@ export class AuthController {
   @Post('login')
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Login successful.',
     schema: {
       type: 'object',
@@ -89,23 +90,23 @@ export class AuthController {
             firstName: { type: 'string', example: 'John' },
             lastName: { type: 'string', example: 'Doe' },
             role: { type: 'string', example: 'user' },
-            subscriptionTier: { type: 'string', example: 'free' }
-          }
-        }
-      }
-    }
+            subscriptionTier: { type: 'string', example: 'free' },
+          },
+        },
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 401, 
+  @ApiResponse({
+    status: 401,
     description: 'Invalid credentials.',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 401 },
         message: { type: 'string', example: 'Invalid email or password' },
-        error: { type: 'string', example: 'Unauthorized' }
-      }
-    }
+        error: { type: 'string', example: 'Unauthorized' },
+      },
+    },
   })
   async login(
     @Body() loginDto: LoginDto,
@@ -117,27 +118,27 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token using refresh token cookie' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Token refreshed successfully.',
     schema: {
       type: 'object',
       properties: {
-        success: { type: 'boolean', example: true }
-      }
-    }
+        success: { type: 'boolean', example: true },
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 401, 
+  @ApiResponse({
+    status: 401,
     description: 'Invalid refresh token.',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 401 },
         message: { type: 'string', example: 'Invalid refresh token' },
-        error: { type: 'string', example: 'Unauthorized' }
-      }
-    }
+        error: { type: 'string', example: 'Unauthorized' },
+      },
+    },
   })
   async refreshToken(
     @Request() req,
@@ -152,15 +153,15 @@ export class AuthController {
 
   @Delete('logout')
   @ApiOperation({ summary: 'Logout and clear cookies' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Logged out successfully.',
     schema: {
       type: 'object',
       properties: {
-        success: { type: 'boolean', example: true }
-      }
-    }
+        success: { type: 'boolean', example: true },
+      },
+    },
   })
   async logout(@Res({ passthrough: true }) response: Response) {
     return this.authService.logout(response);
@@ -170,8 +171,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get user profile' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Returns user profile.',
     schema: {
       type: 'object',
@@ -181,20 +182,20 @@ export class AuthController {
         firstName: { type: 'string', example: 'John' },
         lastName: { type: 'string', example: 'Doe' },
         role: { type: 'string', example: 'user' },
-        subscriptionTier: { type: 'string', example: 'free' }
-      }
-    }
+        subscriptionTier: { type: 'string', example: 'free' },
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 401, 
+  @ApiResponse({
+    status: 401,
     description: 'Unauthorized.',
     schema: {
       type: 'object',
       properties: {
         statusCode: { type: 'number', example: 401 },
-        message: { type: 'string', example: 'Unauthorized' }
-      }
-    }
+        message: { type: 'string', example: 'Unauthorized' },
+      },
+    },
   })
   async getProfile(@Request() req) {
     return req.user;
