@@ -5,7 +5,7 @@ import { SubscriptionTier } from '../../users/schemas/user.schema';
 export class CreatePaymentDto {
   @ApiProperty({
     description: 'User ID who is making the payment',
-    example: '60d21b4667d0d8992e610c85'
+    example: '60d21b4667d0d8992e610c85',
   })
   @IsNotEmpty()
   @IsString()
@@ -14,7 +14,7 @@ export class CreatePaymentDto {
   @ApiProperty({
     description: 'Subscription tier to purchase',
     enum: SubscriptionTier,
-    example: SubscriptionTier.PROFESSIONAL
+    example: SubscriptionTier.PROFESSIONAL,
   })
   @IsNotEmpty()
   @IsEnum(SubscriptionTier)
@@ -22,7 +22,7 @@ export class CreatePaymentDto {
 
   @ApiProperty({
     description: 'Success URL to redirect after payment',
-    example: 'https://example.com/success'
+    example: 'https://example.com/success',
   })
   @IsOptional()
   @IsString()
@@ -30,7 +30,7 @@ export class CreatePaymentDto {
 
   @ApiProperty({
     description: 'Cancel URL to redirect if payment is canceled',
-    example: 'https://example.com/cancel'
+    example: 'https://example.com/cancel',
   })
   @IsOptional()
   @IsString()
@@ -39,7 +39,7 @@ export class CreatePaymentDto {
   @ApiProperty({
     description: 'Payment method - monthly or yearly',
     enum: ['monthly', 'yearly'],
-    example: 'monthly'
+    example: 'monthly',
   })
   @IsOptional()
   @IsString()

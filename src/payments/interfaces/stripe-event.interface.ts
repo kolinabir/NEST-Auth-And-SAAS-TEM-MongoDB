@@ -37,7 +37,14 @@ export interface StripeSubscription {
   id: string;
   object: 'subscription';
   customer: string;
-  status: 'active' | 'past_due' | 'canceled' | 'incomplete' | 'incomplete_expired' | 'trialing' | 'unpaid';
+  status:
+    | 'active'
+    | 'past_due'
+    | 'canceled'
+    | 'incomplete'
+    | 'incomplete_expired'
+    | 'trialing'
+    | 'unpaid';
   current_period_start: number;
   current_period_end: number;
   cancel_at_period_end: boolean;
@@ -62,7 +69,13 @@ export interface StripePaymentIntent {
   object: 'payment_intent';
   amount: number;
   currency: string;
-  status: 'succeeded' | 'processing' | 'requires_payment_method' | 'requires_confirmation' | 'requires_action' | 'canceled';
+  status:
+    | 'succeeded'
+    | 'processing'
+    | 'requires_payment_method'
+    | 'requires_confirmation'
+    | 'requires_action'
+    | 'canceled';
   customer: string;
   metadata: {
     userId: string;

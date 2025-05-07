@@ -1,4 +1,10 @@
-import { Injectable, Logger, BadRequestException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { UsersService } from '../users/users.service';
@@ -6,8 +12,16 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { SubscriptionTier } from '../users/schemas/user.schema';
 import { SubscriptionFeatures } from '../subscriptions/subscriptions-features.config';
-import { SubscriptionStatus, PaymentMethod } from '../subscriptions/schemas/subscription.schema';
-import { StripeEvent, StripeCheckoutSession, StripeSubscription, StripePaymentIntent } from './interfaces/stripe-event.interface';
+import {
+  SubscriptionStatus,
+  PaymentMethod,
+} from '../subscriptions/schemas/subscription.schema';
+import {
+  StripeEvent,
+  StripeCheckoutSession,
+  StripeSubscription,
+  StripePaymentIntent,
+} from './interfaces/stripe-event.interface';
 
 @Injectable()
 export class PaymentsService {
@@ -20,11 +34,13 @@ export class PaymentsService {
     private readonly subscriptionsService: SubscriptionsService,
   ) {
     const stripeKey = this.configService.get<string>('stripe.secretKey');
-    
+
     if (!stripeKey) {
-      this.logger.warn('Stripe secret key not found, payment functionality will be limited');
+      this.logger.warn(
+        'Stripe secret key not found, payment functionality will be limited',
+      );
     }
-    
+
     try {
       this.stripe = new Stripe(stripeKey || 'dummy_key_for_dev', {
         apiVersion: '2023-10-16',
@@ -39,7 +55,8 @@ export class PaymentsService {
    * Creates a Stripe checkout session for subscription
    */
   async createCheckoutSession(createPaymentDto: CreatePaymentDto) {
-    const { userId, tier, paymentType, successUrl, cancelUrl } = createPaymentDto;
+    const { userId, tier, paymentType, successUrl, cancelUrl } =
+      createPaymentDto;
 
     // Verify user exists
     const user = await this.usersService.findById(userId);
@@ -54,8 +71,11 @@ export class PaymentsService {
     }
 
     // Calculate price based on payment type (monthly/yearly)
-    const price = paymentType === 'yearly' ? tierDetails.price.yearly : tierDetails.price.monthly;
-    
+    const price =
+      paymentType === 'yearly'
+        ? tierDetails.price.yearly
+        : tierDetails.price.monthly;
+
     // If tier is FREE, don't create a payment session
     if (tier === SubscriptionTier.FREE) {
       // Create a free subscription
@@ -88,7 +108,10 @@ export class PaymentsService {
         line_items: [
           {
             price_data: {
-              currency: this.configService.get<string>('stripe.currency', 'usd'),
+              currency: this.configService.get<string>(
+                'stripe.currency',
+                'usd',
+              ),
               product_data: {
                 name: productName,
                 description: tierDetails.features.join(', '),
@@ -108,8 +131,12 @@ export class PaymentsService {
           tier,
           paymentType,
         },
-        success_url: successUrl || this.configService.get<string>('stripe.paymentSuccessUrl'),
-        cancel_url: cancelUrl || this.configService.get<string>('stripe.paymentCancelUrl'),
+        success_url:
+          successUrl ||
+          this.configService.get<string>('stripe.paymentSuccessUrl'),
+        cancel_url:
+          cancelUrl ||
+          this.configService.get<string>('stripe.paymentCancelUrl'),
       });
 
       return {
@@ -118,8 +145,13 @@ export class PaymentsService {
         url: session.url,
       };
     } catch (error) {
-      this.logger.error(`Failed to create checkout session: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Failed to create payment session');
+      this.logger.error(
+        `Failed to create checkout session: ${error.message}`,
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        'Failed to create payment session',
+      );
     }
   }
 
@@ -127,10 +159,12 @@ export class PaymentsService {
    * Handles webhook events from Stripe
    */
   async handleWebhookEvent(signature: string, rawBody: Buffer) {
-    const webhookSecret = this.configService.get<string>('stripe.webhookSecret');
-    
+    const webhookSecret = this.configService.get<string>(
+      'stripe.webhookSecret',
+    );
+
     let event: StripeEvent;
-    
+
     try {
       event = this.stripe.webhooks.constructEvent(
         rawBody,
@@ -138,8 +172,12 @@ export class PaymentsService {
         webhookSecret,
       ) as StripeEvent;
     } catch (error) {
-      this.logger.error(`Webhook signature verification failed: ${error.message}`);
-      throw new BadRequestException(`Webhook signature verification failed: ${error.message}`);
+      this.logger.error(
+        `Webhook signature verification failed: ${error.message}`,
+      );
+      throw new BadRequestException(
+        `Webhook signature verification failed: ${error.message}`,
+      );
     }
 
     this.logger.log(`Webhook event received: ${event.type}`);
@@ -147,32 +185,47 @@ export class PaymentsService {
     try {
       switch (event.type) {
         case 'checkout.session.completed':
-          await this.handleCheckoutSessionCompleted(event.data.object as StripeCheckoutSession);
+          await this.handleCheckoutSessionCompleted(
+            event.data.object as StripeCheckoutSession,
+          );
           break;
 
         case 'customer.subscription.created':
         case 'customer.subscription.updated':
-          await this.handleSubscriptionUpdated(event.data.object as StripeSubscription);
+          await this.handleSubscriptionUpdated(
+            event.data.object as StripeSubscription,
+          );
           break;
 
         case 'customer.subscription.deleted':
-          await this.handleSubscriptionDeleted(event.data.object as StripeSubscription);
+          await this.handleSubscriptionDeleted(
+            event.data.object as StripeSubscription,
+          );
           break;
 
         case 'payment_intent.succeeded':
-          await this.handlePaymentIntentSucceeded(event.data.object as StripePaymentIntent);
+          await this.handlePaymentIntentSucceeded(
+            event.data.object as StripePaymentIntent,
+          );
           break;
 
         case 'payment_intent.payment_failed':
-          await this.handlePaymentIntentFailed(event.data.object as StripePaymentIntent);
+          await this.handlePaymentIntentFailed(
+            event.data.object as StripePaymentIntent,
+          );
           break;
 
         default:
           this.logger.log(`Unhandled event type: ${event.type}`);
       }
     } catch (error) {
-      this.logger.error(`Error handling webhook event: ${error.message}`, error.stack);
-      throw new InternalServerErrorException(`Error handling webhook event: ${error.message}`);
+      this.logger.error(
+        `Error handling webhook event: ${error.message}`,
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        `Error handling webhook event: ${error.message}`,
+      );
     }
 
     return { received: true };
@@ -188,29 +241,32 @@ export class PaymentsService {
     }
 
     const { userId, tier } = session.metadata;
-    
+
     if (!userId || !tier) {
       this.logger.error(`Missing metadata in checkout session ${session.id}`);
       return;
     }
 
     // Retrieve the subscription from Stripe to get details
-    const stripeSubscription = await this.stripe.subscriptions.retrieve(session.subscription);
-    
+    const stripeSubscription = await this.stripe.subscriptions.retrieve(
+      session.subscription,
+    );
+
     // Calculate subscription dates
     const startDate = new Date(stripeSubscription.current_period_start * 1000);
     const endDate = new Date(stripeSubscription.current_period_end * 1000);
-    
+
     // Get price information from the first subscription item
     const price = stripeSubscription.items.data[0]?.price;
-    
+
     // Create subscription record in database
     const subscription = await this.subscriptionsService.create({
       userId,
       tier: tier as SubscriptionTier,
-      status: stripeSubscription.status === 'active' 
-        ? SubscriptionStatus.ACTIVE 
-        : SubscriptionStatus.PENDING,
+      status:
+        stripeSubscription.status === 'active'
+          ? SubscriptionStatus.ACTIVE
+          : SubscriptionStatus.PENDING,
       startDate,
       endDate,
       autoRenew: !stripeSubscription.cancel_at_period_end,
@@ -221,7 +277,9 @@ export class PaymentsService {
       features: SubscriptionFeatures[tier].features,
     });
 
-    this.logger.log(`Subscription created for user ${userId}: ${subscription.id}`);
+    this.logger.log(
+      `Subscription created for user ${userId}: ${subscription.id}`,
+    );
   }
 
   /**
@@ -229,10 +287,13 @@ export class PaymentsService {
    */
   private async handleSubscriptionUpdated(subscription: StripeSubscription) {
     // Find the subscription in our database by external ID
-    const existingSubscription = await this.subscriptionsService.findByExternalId(subscription.id);
-    
+    const existingSubscription =
+      await this.subscriptionsService.findByExternalId(subscription.id);
+
     if (!existingSubscription) {
-      this.logger.error(`Subscription ${subscription.id} not found in database`);
+      this.logger.error(
+        `Subscription ${subscription.id} not found in database`,
+      );
       return;
     }
 
@@ -264,10 +325,14 @@ export class PaymentsService {
       startDate: new Date(subscription.current_period_start * 1000),
       endDate: new Date(subscription.current_period_end * 1000),
       autoRenew: !subscription.cancel_at_period_end,
-      canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : undefined,
+      canceledAt: subscription.canceled_at
+        ? new Date(subscription.canceled_at * 1000)
+        : undefined,
     });
 
-    this.logger.log(`Subscription ${existingSubscription.id} updated to status: ${status}`);
+    this.logger.log(
+      `Subscription ${existingSubscription.id} updated to status: ${status}`,
+    );
   }
 
   /**
@@ -275,10 +340,13 @@ export class PaymentsService {
    */
   private async handleSubscriptionDeleted(subscription: StripeSubscription) {
     // Find the subscription in our database by external ID
-    const existingSubscription = await this.subscriptionsService.findByExternalId(subscription.id);
-    
+    const existingSubscription =
+      await this.subscriptionsService.findByExternalId(subscription.id);
+
     if (!existingSubscription) {
-      this.logger.error(`Subscription ${subscription.id} not found in database`);
+      this.logger.error(
+        `Subscription ${subscription.id} not found in database`,
+      );
       return;
     }
 
@@ -289,13 +357,17 @@ export class PaymentsService {
       autoRenew: false,
     });
 
-    this.logger.log(`Subscription ${existingSubscription.id} marked as canceled`);
+    this.logger.log(
+      `Subscription ${existingSubscription.id} marked as canceled`,
+    );
   }
 
   /**
    * Handles successful payment intents
    */
-  private async handlePaymentIntentSucceeded(paymentIntent: StripePaymentIntent) {
+  private async handlePaymentIntentSucceeded(
+    paymentIntent: StripePaymentIntent,
+  ) {
     this.logger.log(`Payment intent succeeded: ${paymentIntent.id}`);
     // Additional processing could be done here, like recording the payment
   }
@@ -311,11 +383,17 @@ export class PaymentsService {
   /**
    * Cancels a subscription in Stripe
    */
-  async cancelSubscription(subscriptionId: string, atPeriodEnd: boolean = true) {
-    const subscription = await this.subscriptionsService.findById(subscriptionId);
-    
+  async cancelSubscription(
+    subscriptionId: string,
+    atPeriodEnd: boolean = true,
+  ) {
+    const subscription =
+      await this.subscriptionsService.findById(subscriptionId);
+
     if (!subscription) {
-      throw new NotFoundException(`Subscription with ID ${subscriptionId} not found`);
+      throw new NotFoundException(
+        `Subscription with ID ${subscriptionId} not found`,
+      );
     }
 
     if (!subscription.externalId) {
@@ -347,8 +425,13 @@ export class PaymentsService {
         canceledAtPeriodEnd: atPeriodEnd,
       };
     } catch (error) {
-      this.logger.error(`Failed to cancel subscription: ${error.message}`, error.stack);
-      throw new InternalServerErrorException(`Failed to cancel subscription: ${error.message}`);
+      this.logger.error(
+        `Failed to cancel subscription: ${error.message}`,
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        `Failed to cancel subscription: ${error.message}`,
+      );
     }
   }
 
@@ -357,21 +440,26 @@ export class PaymentsService {
    */
   async createCustomerPortalSession(userId: string, returnUrl?: string) {
     const user = await this.usersService.findById(userId);
-    
+
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
     // Find active subscription
-    const subscription = await this.subscriptionsService.findActiveByUserId(userId);
-    
+    const subscription =
+      await this.subscriptionsService.findActiveByUserId(userId);
+
     if (!subscription || !subscription.externalId) {
-      throw new BadRequestException('No active subscription found for this user');
+      throw new BadRequestException(
+        'No active subscription found for this user',
+      );
     }
 
     // Get Stripe subscription to find customer ID
-    const stripeSubscription = await this.stripe.subscriptions.retrieve(subscription.externalId);
-    
+    const stripeSubscription = await this.stripe.subscriptions.retrieve(
+      subscription.externalId,
+    );
+
     if (!stripeSubscription.customer) {
       throw new BadRequestException('No customer found for this subscription');
     }
@@ -379,7 +467,9 @@ export class PaymentsService {
     try {
       const session = await this.stripe.billingPortal.sessions.create({
         customer: stripeSubscription.customer as string,
-        return_url: returnUrl || this.configService.get<string>('stripe.paymentSuccessUrl'),
+        return_url:
+          returnUrl ||
+          this.configService.get<string>('stripe.paymentSuccessUrl'),
       });
 
       return {
@@ -387,8 +477,13 @@ export class PaymentsService {
         url: session.url,
       };
     } catch (error) {
-      this.logger.error(`Failed to create customer portal session: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Failed to create customer portal session');
+      this.logger.error(
+        `Failed to create customer portal session: ${error.message}`,
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        'Failed to create customer portal session',
+      );
     }
   }
 

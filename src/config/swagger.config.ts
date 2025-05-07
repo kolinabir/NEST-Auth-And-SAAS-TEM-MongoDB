@@ -86,14 +86,22 @@ export function setupSwagger(app: INestApplication) {
       properties: {
         success: { type: 'boolean', example: true },
         sessionId: { type: 'string', example: 'cs_test_a1b2c3d4e5f6g7h8i9j0' },
-        url: { type: 'string', example: 'https://checkout.stripe.com/c/pay/cs_test_a1b2c3d4e5f6g7h8i9j0' },
+        url: {
+          type: 'string',
+          example:
+            'https://checkout.stripe.com/c/pay/cs_test_a1b2c3d4e5f6g7h8i9j0',
+        },
       },
     },
     CustomerPortalSession: {
       type: 'object',
       properties: {
         success: { type: 'boolean', example: true },
-        url: { type: 'string', example: 'https://billing.stripe.com/p/session/cs_test_a1b2c3d4e5f6g7h8i9j0' },
+        url: {
+          type: 'string',
+          example:
+            'https://billing.stripe.com/p/session/cs_test_a1b2c3d4e5f6g7h8i9j0',
+        },
       },
     },
     CancelSubscription: {
