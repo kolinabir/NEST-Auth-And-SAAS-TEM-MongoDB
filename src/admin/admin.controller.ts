@@ -110,10 +110,7 @@ export class AdminController {
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiBody({ type: BlockUserDto })
   @ApiResponse({ status: 200, description: 'User block status updated' })
-  async blockUser(
-    @Param('id') id: string,
-    @Body() blockUserDto: BlockUserDto,
-  ) {
+  async blockUser(@Param('id') id: string, @Body() blockUserDto: BlockUserDto) {
     return this.adminService.setUserBlockStatus(id, blockUserDto);
   }
 
@@ -253,10 +250,7 @@ export class AdminController {
   @ApiQuery({ name: 'page', type: 'number', required: false })
   @ApiQuery({ name: 'limit', type: 'number', required: false })
   @ApiResponse({ status: 200, description: 'Returns activity logs' })
-  async getActivityLogs(
-    @Query('page') page = 1,
-    @Query('limit') limit = 20,
-  ) {
+  async getActivityLogs(@Query('page') page = 1, @Query('limit') limit = 20) {
     return this.adminService.getActivityLogs(+page, +limit);
   }
 }

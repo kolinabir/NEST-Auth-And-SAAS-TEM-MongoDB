@@ -1,4 +1,9 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -14,7 +19,7 @@ export class AdminActivityInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(() => {
         const responseTime = Date.now() - now;
-        
+
         // Log admin activity - in a real implementation, this would be saved to the database
         console.log({
           adminId: user?.id,

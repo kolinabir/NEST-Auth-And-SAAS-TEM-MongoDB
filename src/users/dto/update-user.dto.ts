@@ -70,10 +70,10 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsDate()
   lastLogin?: Date;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'User blocked status',
     example: false,
-    type: Boolean
+    type: Boolean,
   })
   @IsOptional()
   @IsBoolean()

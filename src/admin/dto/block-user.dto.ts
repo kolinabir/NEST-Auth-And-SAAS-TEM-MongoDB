@@ -6,7 +6,11 @@ export class BlockUserDto {
   @IsBoolean()
   blocked: boolean;
 
-  @ApiProperty({ example: 'Violated terms of service', description: 'Reason for blocking', required: false })
+  @ApiProperty({
+    example: 'Violated terms of service',
+    description: 'Reason for blocking',
+    required: false,
+  })
   @IsOptional()
   @IsString()
   reason?: string;

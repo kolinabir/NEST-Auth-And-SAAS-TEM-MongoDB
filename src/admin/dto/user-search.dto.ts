@@ -1,5 +1,14 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum, IsEmail, IsNumber, Min, Max, IsBoolean } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsEmail,
+  IsNumber,
+  Min,
+  Max,
+  IsBoolean,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserRole, SubscriptionTier } from '../../users/schemas/user.schema';
 
@@ -7,7 +16,10 @@ import { UserRole, SubscriptionTier } from '../../users/schemas/user.schema';
 type BlockedFilterType = boolean | 'true' | 'false';
 
 export class UserSearchDto {
-  @ApiPropertyOptional({ example: 'john', description: 'Search term for name or email' })
+  @ApiPropertyOptional({
+    example: 'john',
+    description: 'Search term for name or email',
+  })
   @IsOptional()
   @IsString()
   search?: string;
@@ -17,17 +29,26 @@ export class UserSearchDto {
   @IsEnum(UserRole)
   role?: UserRole;
 
-  @ApiPropertyOptional({ enum: SubscriptionTier, description: 'Filter by subscription tier' })
+  @ApiPropertyOptional({
+    enum: SubscriptionTier,
+    description: 'Filter by subscription tier',
+  })
   @IsOptional()
   @IsEnum(SubscriptionTier)
   subscriptionTier?: SubscriptionTier;
 
-  @ApiPropertyOptional({ example: 'john.doe@example.com', description: 'Filter by exact email' })
+  @ApiPropertyOptional({
+    example: 'john.doe@example.com',
+    description: 'Filter by exact email',
+  })
   @IsOptional()
   @IsEmail()
   email?: string;
 
-  @ApiPropertyOptional({ example: true, description: 'Filter by blocked status' })
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Filter by blocked status',
+  })
   @IsOptional()
   @IsBoolean()
   blocked?: BlockedFilterType;
@@ -39,7 +60,11 @@ export class UserSearchDto {
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ example: 10, description: 'Items per page', default: 10 })
+  @ApiPropertyOptional({
+    example: 10,
+    description: 'Items per page',
+    default: 10,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsNumber()

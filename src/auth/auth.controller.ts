@@ -17,7 +17,16 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { Response } from 'express';
-import { ApiTags, ApiOperation, ApiBody, ApiResponse, ApiBearerAuth, ApiProperty, ApiCookieAuth, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiProperty,
+  ApiCookieAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { Roles } from './decorators/roles.decorator';
 import { UserRole } from '../users/schemas/user.schema';
 import { RolesGuard } from './guards/roles.guard';
@@ -25,7 +34,8 @@ import { RolesGuard } from './guards/roles.guard';
 class RefreshTokenDto {
   @ApiProperty({
     description: 'Refresh token',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGQyMWI0NjY3ZDBkODk5MmU2MTBjODUiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwiaWF0IjoxNjMwMDAwMDAwLCJleHAiOjE2MzAwMDM2MDB9.wNqR9UDA_TPCRCwQJA8mH3r_awGulIglFcITIqG8jzM',
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MGQyMWI0NjY3ZDBkODk5MmU2MTBjODUiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwiaWF0IjoxNjMwMDAwMDAwLCJleHAiOjE2MzAwMDM2MDB9.wNqR9UDA_TPCRCwQJA8mH3r_awGulIglFcITIqG8jzM',
   })
   refreshToken: string;
 }
@@ -41,7 +51,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({ status: 201, description: 'User successfully registered.' })
-  @ApiResponse({ status: 400, description: 'Email already registered or invalid input.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Email already registered or invalid input.',
+  })
   async register(@Body() registerDto: RegisterDto) {
     const user = await this.authService.register(registerDto);
     return { message: 'User registered successfully', userId: user.id };
@@ -183,14 +196,14 @@ export class AuthController {
   @Get('users')
   @ApiOperation({ summary: 'List all users (admin only)' })
   @ApiResponse({ status: 200, description: 'Returns list of users' })
-  @ApiResponse({ status: 403, description: 'Forbidden - admin access required' })
-  async listUsers(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-  ) {
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - admin access required',
+  })
+  async listUsers(@Query('page') page = 1, @Query('limit') limit = 10) {
     return this.authService.listUsers(+page, +limit);
   }
-  
+
   @ApiTags('Admin Controls')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -198,12 +211,15 @@ export class AuthController {
   @ApiOperation({ summary: 'Create user as admin' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({ status: 201, description: 'User created successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - admin access required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - admin access required',
+  })
   async createUser(@Body() registerDto: RegisterDto) {
     const user = await this.authService.createUserAsAdmin(registerDto);
     return { message: 'User created successfully', userId: user.id };
   }
-  
+
   @ApiTags('Admin Controls')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -212,11 +228,14 @@ export class AuthController {
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({ status: 200, description: 'User deleted successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - admin access required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - admin access required',
+  })
   async deleteUser(@Param('id') id: string) {
     return this.authService.deleteUser(id);
   }
-  
+
   @ApiTags('Admin Controls')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -225,7 +244,10 @@ export class AuthController {
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({ status: 200, description: 'Email verified successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - admin access required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - admin access required',
+  })
   async verifyUserEmail(@Param('id') id: string) {
     return this.authService.verifyUserEmail(id);
   }

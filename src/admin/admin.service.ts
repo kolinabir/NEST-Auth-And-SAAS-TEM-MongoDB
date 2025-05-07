@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { AdminUserUpdateDto } from './dto/admin-user-update.dto';
 import { BlockUserDto } from './dto/block-user.dto';
@@ -93,16 +97,14 @@ export class AdminService {
 
   async impersonateUser(id: string) {
     const user = await this.findUserById(id);
-    
-    const token = this.jwtService.sign(
-      { 
-        sub: user.id, 
-        email: user.email,
-        isImpersonation: true,
-        adminAction: true
-      }
-    );
-    
+
+    const token = this.jwtService.sign({
+      sub: user.id,
+      email: user.email,
+      isImpersonation: true,
+      adminAction: true,
+    });
+
     return { token };
   }
 

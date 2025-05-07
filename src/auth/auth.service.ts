@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -173,16 +178,16 @@ export class AuthService {
 
   async createUserAsAdmin(registerDto: RegisterDto): Promise<UserDocument> {
     const { email, password, role } = registerDto;
-    
+
     // Check if user already exists
     const existingUser = await this.usersService.findByEmail(email);
     if (existingUser) {
       throw new BadRequestException('Email already registered');
     }
-    
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     // Create user with admin-specified role and verification status
     const newUser = await this.usersService.create({
       ...registerDto,
@@ -190,30 +195,32 @@ export class AuthService {
       authMethods: ['local'],
       // Fixed the issue by using proper typing for the update
     });
-    
+
     // Update user with admin-specific fields after creation
     return this.usersService.update(newUser.id, {
       emailVerified: registerDto.skipEmailVerification || false,
       role: role || UserRole.USER,
     });
   }
-  
+
   async deleteUser(id: string): Promise<{ success: boolean }> {
     const result = await this.usersService.delete(id);
     return { success: result };
   }
-  
-  async verifyUserEmail(id: string): Promise<{ success: boolean; message: string }> {
+
+  async verifyUserEmail(
+    id: string,
+  ): Promise<{ success: boolean; message: string }> {
     const user = await this.usersService.findById(id);
     if (!user) {
       throw new BadRequestException('User not found');
     }
-    
+
     await this.usersService.markEmailAsVerified(id);
     // Explicitly define return type to include message property
     return { success: true, message: 'Email verified successfully' };
   }
-  
+
   async listUsers(page = 1, limit = 10): Promise<any> {
     return this.usersService.paginate(page, limit);
   }

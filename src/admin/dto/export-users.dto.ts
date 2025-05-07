@@ -8,11 +8,18 @@ export enum ExportFormat {
 }
 
 export class ExportUsersDto {
-  @ApiProperty({ enum: ExportFormat, default: ExportFormat.CSV, description: 'Export file format' })
+  @ApiProperty({
+    enum: ExportFormat,
+    default: ExportFormat.CSV,
+    description: 'Export file format',
+  })
   @IsEnum(ExportFormat)
   format: ExportFormat = ExportFormat.CSV;
 
-  @ApiPropertyOptional({ example: 'users-export', description: 'Custom filename' })
+  @ApiPropertyOptional({
+    example: 'users-export',
+    description: 'Custom filename',
+  })
   @IsOptional()
   @IsString()
   filename?: string;
@@ -22,7 +29,10 @@ export class ExportUsersDto {
   @IsString()
   roleFilter?: string;
 
-  @ApiPropertyOptional({ example: 'professional', description: 'Filter by subscription tier' })
+  @ApiPropertyOptional({
+    example: 'professional',
+    description: 'Filter by subscription tier',
+  })
   @IsOptional()
   @IsString()
   subscriptionFilter?: string;

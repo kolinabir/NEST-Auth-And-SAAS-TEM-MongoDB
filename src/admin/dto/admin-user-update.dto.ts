@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, IsEnum, IsBoolean } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsBoolean,
+} from 'class-validator';
 import { UserRole } from '../../users/schemas/user.schema';
 
 export class AdminUserUpdateDto {
@@ -13,17 +19,27 @@ export class AdminUserUpdateDto {
   @IsString()
   lastName?: string;
 
-  @ApiPropertyOptional({ example: 'john.doe@example.com', description: 'User email' })
+  @ApiPropertyOptional({
+    example: 'john.doe@example.com',
+    description: 'User email',
+  })
   @IsOptional()
   @IsEmail()
   email?: string;
 
-  @ApiPropertyOptional({ enum: UserRole, example: UserRole.ADMIN, description: 'User role' })
+  @ApiPropertyOptional({
+    enum: UserRole,
+    example: UserRole.ADMIN,
+    description: 'User role',
+  })
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
 
-  @ApiPropertyOptional({ example: true, description: 'Email verification status' })
+  @ApiPropertyOptional({
+    example: true,
+    description: 'Email verification status',
+  })
   @IsOptional()
   @IsBoolean()
   emailVerified?: boolean;
