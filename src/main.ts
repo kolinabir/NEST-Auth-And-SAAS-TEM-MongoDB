@@ -3,7 +3,10 @@ import { ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
+import * as session from 'express-session';
+import * as passport from 'passport';
+import { setupSwagger } from './config/swagger.config';
 
 async function bootstrap() {
   // Create the NestJS application
@@ -14,37 +17,50 @@ async function bootstrap() {
   // Get config service
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port', 3000);
-
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   // Enable validation pipe globally
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Strip properties not in DTO
-      transform: true, // Transform payloads to DTO instances
-      forbidNonWhitelisted: true, // Throw error if non-whitelisted properties are present
+      whitelist: true,
+      transform: true, 
+      forbidNonWhitelisted: true,
     }),
   );
 
   // Use Pino logger
   app.useLogger(app.get(Logger));
+  
+  // Enable CORS with credentials
+  app.enableCors({
+    origin: configService.get('app.frontendUrl'),
+    credentials: true,
+  });
 
-  // Enable CORS
-  app.enableCors();
+  // Add cookie parser middleware
+  app.use(cookieParser());
+  
+  // Setup session
+  app.use(
+    session({
+      secret: configService.get<string>('app.jwt.accessTokenSecret'),
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: isProduction, // Only use secure cookies in production
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+        sameSite: isProduction ? 'none' : 'lax',
+      },
+    }),
+  );
+  
+  // Initialize Passport and session
+  app.use(passport.initialize());
+  app.use(passport.session());
 
-  // Setup Swagger documentation
-  const config = new DocumentBuilder()
-    .setTitle('SaaS Template API')
-    .setDescription(
-      'The API documentation for SaaS Template with Authentication and Subscription Management',
-    )
-    .setVersion('1.0')
-    .addTag('users', 'User management operations')
-    .addTag('auth', 'Authentication operations')
-    .addTag('subscriptions', 'Subscription management')
-    .addBearerAuth()
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  // Set up Swagger documentation
+  setupSwagger(app);
 
   // Start the application
   await app.listen(port);

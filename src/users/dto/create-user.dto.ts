@@ -1,4 +1,12 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength, IsArray } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+  IsArray,
+} from 'class-validator';
 import { SubscriptionTier, UserRole } from '../schemas/user.schema';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -62,15 +70,26 @@ export class CreateUserDto {
     description: 'Provider data for OAuth authentication',
     type: 'object',
     additionalProperties: true,
+    example: {
+      provider: 'google',
+      providerId: '123456789',
+      picture: 'https://example.com/profile.jpg',
+      accessToken: 'ya29.a0AfB_byC...',
+      profile: {
+        name: 'John Doe',
+        email: 'john.doe@gmail.com'
+      }
+    }
   })
   @IsOptional()
   providerData?: Record<string, any>;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Authentication methods',
+    example: ['local', 'google'],
+    isArray: true,
     type: [String],
-    example: ['local'],
-    isArray: true
+    enum: ['local', 'google', 'facebook', 'github']
   })
   @IsOptional()
   @IsArray()

@@ -66,27 +66,30 @@ pnpm add class-validator class-transformer @nestjs/mapped-types @nestjs/swagger
 
 - Implement password hashing
 - Create local authentication strategy
-- Set up JWT authentication
+- Set up JWT authentication with cookie sessions
 - Create auth guards
 - Implement login/register endpoints
+- Add logout functionality
 
 **Required packages:**
 
 ```bash
-pnpm add @nestjs/passport @nestjs/jwt passport passport-local passport-jwt bcrypt
-pnpm add -D @types/passport-local @types/passport-jwt @types/bcrypt
+pnpm add @nestjs/passport @nestjs/jwt passport passport-local passport-jwt bcrypt cookie-parser express-session
+pnpm add -D @types/passport-local @types/passport-jwt @types/bcrypt @types/cookie-parser @types/express-session
 ```
 
 **Additional tasks:**
 
 - Add Swagger documentation for auth endpoints
 - Implement API security schemes in Swagger
+- Configure secure cookie settings for tokens
 
 **Files to create:**
 
 - src/auth/strategies/local.strategy.ts
 - src/auth/strategies/jwt.strategy.ts
 - src/auth/guards/jwt-auth.guard.ts
+- src/auth/decorators/public.decorator.ts
 - src/auth/dto/login.dto.ts
 - src/auth/dto/register.dto.ts
 - src/auth/auth.service.ts
@@ -229,9 +232,9 @@ pnpm add @nestjs/throttler
 - src/projects/dto/create-project.dto.ts
 - src/projects/dto/update-project.dto.ts
 - src/projects/projects.repository.ts
-- src/projects/projects.service.ts
-- src/projects/projects.controller.ts
-- src/projects/projects.module.ts
+- src/projects.projects.service.ts
+- src/projects.projects.controller.ts
+- src/projects.projects.module.ts
 - src/projects/guards/project-limit.guard.ts
 
 ## Part 9: Team Management

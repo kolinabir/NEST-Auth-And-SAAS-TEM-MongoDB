@@ -6,6 +6,7 @@ import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserDocument } from '../users/schemas/user.schema';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -51,7 +52,7 @@ export class AuthService {
     return newUser;
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, response: Response) {
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
@@ -62,6 +63,9 @@ export class AuthService {
     // Update lastLogin - now properly typed in UpdateUserDto
     await this.usersService.update(user.id, { lastLogin: new Date() });
     
+    // Set cookies
+    this.setTokenCookies(response, tokens);
+    
     return {
       user: {
         id: user.id,
@@ -70,8 +74,7 @@ export class AuthService {
         lastName: user.lastName,
         role: user.role,
         subscriptionTier: user.subscriptionTier,
-      },
-      ...tokens,
+      }
     };
   }
 
@@ -94,10 +97,10 @@ export class AuthService {
     };
   }
 
-  async refreshToken(token: string) {
+  async refreshToken(refreshToken: string, response: Response) {
     try {
       // Verify refresh token
-      const payload = this.jwtService.verify(token, {
+      const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get<string>('app.jwt.refreshTokenSecret'),
       });
       
@@ -108,9 +111,56 @@ export class AuthService {
       }
       
       // Generate new tokens
-      return this.generateTokens(user);
+      const tokens = await this.generateTokens(user);
+      
+      // Set cookies
+      this.setTokenCookies(response, tokens);
+      
+      return { success: true };
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
     }
+  }
+
+  // Helper method to set secure cookies
+  private setTokenCookies(response: Response, tokens: { accessToken: string, refreshToken: string }) {
+    const isProduction = this.configService.get('app.nodeEnv') === 'production';
+    
+    // Set access token cookie
+    response.cookie('access_token', tokens.accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: 15 * 60 * 1000, // 15 minutes in ms
+    });
+    
+    // Set refresh token cookie
+    response.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+    });
+  }
+
+  // Method to clear auth cookies on logout
+  logout(response: Response) {
+    const isProduction = this.configService.get('app.nodeEnv') === 'production';
+    
+    response.cookie('access_token', '', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: 0,
+    });
+    
+    response.cookie('refresh_token', '', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: 0,
+    });
+    
+    return { success: true };
   }
 }
