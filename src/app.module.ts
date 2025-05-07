@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerModule } from 'nestjs-pino';
-import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
+import { UsersModule } from './users/users.module';
+import appConfig from './config/app.config';
 
 @Module({
   imports: [
@@ -18,18 +19,18 @@ import databaseConfig from './config/database.config';
     LoggerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const isProduction = configService.get<string>('app.nodeEnv') === 'production';
+        // Fix: Use process.env directly for NODE_ENV since it might be accessed before config is initialized
+        const isProduction = process.env.NODE_ENV === 'production';
         return {
           pinoHttp: {
-            // Fix for pino-pretty transport configuration
-            transport: isProduction 
-              ? undefined 
+            transport: isProduction
+              ? undefined
               : {
                   target: 'pino-pretty',
                   options: {
                     colorize: true,
                     singleLine: true,
-                  }
+                  },
                 },
             level: isProduction ? 'info' : 'debug',
           },
@@ -46,6 +47,9 @@ import databaseConfig from './config/database.config';
         ...configService.get('database.options'),
       }),
     }),
+
+    // Feature modules
+    UsersModule,
   ],
   controllers: [],
   providers: [],

@@ -93,6 +93,7 @@
     "testEnvironment": "node"
   },
   "dependencies": {
+    "@nestjs/mapped-types": "^2.1.0",
     "nestjs-pino": "^4.4.0",
     "pino-http": "^10.4.0"
   }
