@@ -13,6 +13,7 @@ import { AnalyticsQueryDto } from './dto/analytics-query.dto';
 import { AdminNotificationDto } from './dto/admin-notification.dto';
 import { AdminSubscriptionUpdateDto } from './dto/admin-subscription-update.dto';
 import { JwtService } from '@nestjs/jwt';
+import { OAuthProviderConfigDto } from './dto/oauth-provider-config.dto';
 
 @Injectable()
 export class AdminService {
@@ -116,5 +117,41 @@ export class AdminService {
   async getActivityLogs(page: number, limit: number) {
     // Implementation will be added later
     return { data: [], meta: { total: 0, page, limit, totalPages: 0 } };
+  }
+
+  async getOAuthProviders() {
+    // Implementation will be added later
+    return [
+      { provider: 'google', enabled: true },
+      { provider: 'facebook', enabled: true },
+      { provider: 'github', enabled: true },
+    ];
+  }
+
+  async getOAuthProvider(provider: string) {
+    // Implementation will be added later
+    return { provider, enabled: true };
+  }
+
+  async updateOAuthProvider(provider: string, configDto: OAuthProviderConfigDto) {
+    // Implementation will be added later
+    return { ...configDto, updated: true };
+  }
+
+  async getOAuthStats() {
+    // Implementation will be added later
+    return {
+      totalOAuthUsers: 0,
+      usersByProvider: {
+        google: 0,
+        facebook: 0,
+        github: 0,
+      },
+      conversionRates: {
+        google: 0,
+        facebook: 0,
+        github: 0,
+      },
+    };
   }
 }

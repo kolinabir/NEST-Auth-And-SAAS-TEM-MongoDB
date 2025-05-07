@@ -34,25 +34,22 @@ export default registerAs('app', () => ({
   // OAuth providers
   oauth: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      callbackUrl:
-        process.env.GOOGLE_CALLBACK_URL ||
-        'http://localhost:3000/api/auth/google/callback',
+      enabled: process.env.OAUTH_GOOGLE_ENABLED === 'true',
+      clientId: process.env.OAUTH_GOOGLE_CLIENT_ID,
+      clientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET,
+      callbackUrl: process.env.OAUTH_GOOGLE_CALLBACK_URL,
     },
     facebook: {
-      clientId: process.env.FACEBOOK_CLIENT_ID || '',
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
-      callbackUrl:
-        process.env.FACEBOOK_CALLBACK_URL ||
-        'http://localhost:3000/api/auth/facebook/callback',
+      enabled: process.env.OAUTH_FACEBOOK_ENABLED === 'true',
+      clientId: process.env.OAUTH_FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.OAUTH_FACEBOOK_CLIENT_SECRET,
+      callbackUrl: process.env.OAUTH_FACEBOOK_CALLBACK_URL,
     },
     github: {
-      clientId: process.env.GITHUB_CLIENT_ID || '',
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
-      callbackUrl:
-        process.env.GITHUB_CALLBACK_URL ||
-        'http://localhost:3000/api/auth/github/callback',
+      enabled: process.env.OAUTH_GITHUB_ENABLED === 'true',
+      clientId: process.env.OAUTH_GITHUB_CLIENT_ID,
+      clientSecret: process.env.OAUTH_GITHUB_CLIENT_SECRET,
+      callbackUrl: process.env.OAUTH_GITHUB_CALLBACK_URL,
     },
   },
 }));

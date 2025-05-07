@@ -104,4 +104,9 @@ export class UsersService {
       emailVerificationToken: null, // This will be converted to undefined for MongoDB
     });
   }
+
+  // Add a method to find users by custom filter
+  async findByFilter(filter: any): Promise<UserDocument | null> {
+    return this.usersRepository.findOne(filter);
+  }
 }

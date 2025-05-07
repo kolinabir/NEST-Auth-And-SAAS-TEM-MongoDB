@@ -30,6 +30,10 @@ import {
 import { Roles } from './decorators/roles.decorator';
 import { UserRole } from '../users/schemas/user.schema';
 import { RolesGuard } from './guards/roles.guard';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { FacebookAuthGuard } from './guards/facebook-auth.guard';
+import { GithubAuthGuard } from './guards/github-auth.guard';
+import { ConfigService } from '@nestjs/config';
 
 class RefreshTokenDto {
   @ApiProperty({
@@ -44,7 +48,10 @@ class RefreshTokenDto {
 @ApiCookieAuth()
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private configService: ConfigService, // Add ConfigService
+  ) {}
 
   @Public()
   @Post('register')
@@ -187,6 +194,92 @@ export class AuthController {
   })
   async getProfile(@Request() req) {
     return req.user;
+  }
+
+  // Google OAuth
+  @Public()
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Initiate Google OAuth authentication flow' })
+  @ApiResponse({ status: 302, description: 'Redirects to Google authentication' })
+  async googleAuth() {
+    // Guard redirects to Google
+  }
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Handle Google OAuth callback' })
+  @ApiResponse({ status: 302, description: 'Redirects to frontend after authentication' })
+  async googleAuthCallback(@Request() req, @Res({ passthrough: true }) response: Response) {
+    try {
+      // Generate tokens for the authenticated user
+      const tokens = await this.authService.generateTokens(req.user);
+      
+      // Set cookies
+      this.authService.setTokenCookies(response, tokens);
+      
+      // Redirect to frontend
+      const frontendUrl = this.configService.get<string>('app.frontendUrl');
+      response.redirect(`${frontendUrl}/auth/success`);
+    } catch (error) {
+      const frontendUrl = this.configService.get<string>('app.frontendUrl');
+      response.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`);
+    }
+  }
+
+  // Facebook OAuth
+  @Public()
+  @Get('facebook')
+  @UseGuards(FacebookAuthGuard)
+  @ApiOperation({ summary: 'Initiate Facebook OAuth authentication flow' })
+  @ApiResponse({ status: 302, description: 'Redirects to Facebook authentication' })
+  async facebookAuth() {
+    // Guard redirects to Facebook
+  }
+
+  @Public()
+  @Get('facebook/callback')
+  @UseGuards(FacebookAuthGuard)
+  @ApiOperation({ summary: 'Handle Facebook OAuth callback' })
+  @ApiResponse({ status: 302, description: 'Redirects to frontend after authentication' })
+  async facebookAuthCallback(@Request() req, @Res({ passthrough: true }) response: Response) {
+    try {
+      const tokens = await this.authService.generateTokens(req.user);
+      this.authService.setTokenCookies(response, tokens);
+      const frontendUrl = this.configService.get<string>('app.frontendUrl');
+      response.redirect(`${frontendUrl}/auth/success`);
+    } catch (error) {
+      const frontendUrl = this.configService.get<string>('app.frontendUrl');
+      response.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`);
+    }
+  }
+
+  // GitHub OAuth
+  @Public()
+  @Get('github')
+  @UseGuards(GithubAuthGuard)
+  @ApiOperation({ summary: 'Initiate GitHub OAuth authentication flow' })
+  @ApiResponse({ status: 302, description: 'Redirects to GitHub authentication' })
+  async githubAuth() {
+    // Guard redirects to GitHub
+  }
+
+  @Public()
+  @Get('github/callback')
+  @UseGuards(GithubAuthGuard)
+  @ApiOperation({ summary: 'Handle GitHub OAuth callback' })
+  @ApiResponse({ status: 302, description: 'Redirects to frontend after authentication' })
+  async githubAuthCallback(@Request() req, @Res({ passthrough: true }) response: Response) {
+    try {
+      const tokens = await this.authService.generateTokens(req.user);
+      this.authService.setTokenCookies(response, tokens);
+      const frontendUrl = this.configService.get<string>('app.frontendUrl');
+      response.redirect(`${frontendUrl}/auth/success`);
+    } catch (error) {
+      const frontendUrl = this.configService.get<string>('app.frontendUrl');
+      response.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`);
+    }
   }
 
   // Admin auth endpoints

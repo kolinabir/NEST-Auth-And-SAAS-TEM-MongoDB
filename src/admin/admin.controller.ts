@@ -10,6 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  Put,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminOnlyGuard } from './guards/admin-only.guard';
@@ -21,6 +22,7 @@ import { UserSearchDto } from './dto/user-search.dto';
 import { ExportUsersDto } from './dto/export-users.dto';
 import { AnalyticsQueryDto } from './dto/analytics-query.dto';
 import { AdminNotificationDto } from './dto/admin-notification.dto';
+import { OAuthProviderConfigDto } from './dto/oauth-provider-config.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -252,5 +254,41 @@ export class AdminController {
   @ApiResponse({ status: 200, description: 'Returns activity logs' })
   async getActivityLogs(@Query('page') page = 1, @Query('limit') limit = 20) {
     return this.adminService.getActivityLogs(+page, +limit);
+  }
+
+  // OAuth Provider Management
+  @Get('oauth/providers')
+  @ApiOperation({ summary: 'Get all OAuth provider configurations' })
+  @ApiResponse({ status: 200, description: 'Returns list of OAuth providers' })
+  async getOAuthProviders() {
+    return this.adminService.getOAuthProviders();
+  }
+
+  @Get('oauth/providers/:provider')
+  @ApiOperation({ summary: 'Get specific OAuth provider configuration' })
+  @ApiParam({ name: 'provider', description: 'Provider name (google, facebook, github)' })
+  @ApiResponse({ status: 200, description: 'Returns provider configuration' })
+  @ApiResponse({ status: 404, description: 'Provider not found' })
+  async getOAuthProvider(@Param('provider') provider: string) {
+    return this.adminService.getOAuthProvider(provider);
+  }
+
+  @Put('oauth/providers/:provider')
+  @ApiOperation({ summary: 'Update OAuth provider configuration' })
+  @ApiParam({ name: 'provider', description: 'Provider name (google, facebook, github)' })
+  @ApiBody({ type: OAuthProviderConfigDto })
+  @ApiResponse({ status: 200, description: 'Provider configuration updated' })
+  async updateOAuthProvider(
+    @Param('provider') provider: string,
+    @Body() configDto: OAuthProviderConfigDto,
+  ) {
+    return this.adminService.updateOAuthProvider(provider, configDto);
+  }
+
+  @Get('oauth/stats')
+  @ApiOperation({ summary: 'Get OAuth usage statistics' })
+  @ApiResponse({ status: 200, description: 'Returns OAuth usage statistics' })
+  async getOAuthStats() {
+    return this.adminService.getOAuthStats();
   }
 }

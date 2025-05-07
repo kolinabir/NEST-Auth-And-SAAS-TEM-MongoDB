@@ -12,6 +12,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserDocument, UserRole } from '../users/schemas/user.schema';
 import { Response } from 'express';
+import { OAuthUserDto } from './dto/oauth-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -131,8 +132,8 @@ export class AuthService {
     }
   }
 
-  // Helper method to set secure cookies
-  private setTokenCookies(
+  // Make setTokenCookies public instead of private
+  public setTokenCookies(
     response: Response,
     tokens: { accessToken: string; refreshToken: string },
   ) {
@@ -223,5 +224,78 @@ export class AuthService {
 
   async listUsers(page = 1, limit = 10): Promise<any> {
     return this.usersService.paginate(page, limit);
+  }
+
+  async validateOAuthUser(oauthUser: OAuthUserDto): Promise<any> {
+    const { providerId, provider, email, firstName, lastName, picture, accessToken } = oauthUser;
+    
+    // First try to find user by provider ID if we have a findByProviderId method
+    let user = null;
+    try {
+      // Check if the findByProviderId method exists
+      if (typeof this.usersService['findByProviderId'] === 'function') {
+        user = await this.usersService['findByProviderId'](provider, providerId);
+      }
+    } catch (error) {
+      // Method may not exist yet, continue with email lookup
+    }
+    
+    // If not found by provider ID, try to find by email
+    if (!user && email) {
+      user = await this.usersService.findByEmail(email);
+    }
+    
+    if (user) {
+      // Update existing user with OAuth info
+      const providerData = user.providerData || {};
+      const authMethods = user.authMethods || [];
+      
+      user = await this.usersService.update(user.id, {
+        authMethods: [...new Set([...authMethods, provider])],
+        providerData: {
+          ...providerData,
+          [provider]: {
+            id: providerId,
+            accessToken,
+            profile: { firstName, lastName, picture }
+          }
+        },
+        // If user was created via another method but email wasn't verified yet,
+        // auto-verify when they log in with OAuth
+        emailVerified: true
+      });
+    } else {
+      // Create new user
+      const newUser = await this.usersService.create({
+        firstName: firstName || 'User',
+        lastName: lastName || provider.charAt(0).toUpperCase() + provider.slice(1),
+        email: email || `${providerId}@${provider}.user`,
+        authMethods: [provider],
+        providerData: {
+          [provider]: {
+            id: providerId,
+            accessToken,
+            profile: { firstName, lastName, picture }
+          }
+        }
+      });
+      
+      // Update user with additional fields after creation
+      user = await this.usersService.update(newUser.id, {
+        emailVerified: !!email, // Auto-verify if email provided by OAuth
+        profile: {
+          avatar: picture
+        }
+      });
+    }
+    
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      subscriptionTier: user.subscriptionTier,
+    };
   }
 }
