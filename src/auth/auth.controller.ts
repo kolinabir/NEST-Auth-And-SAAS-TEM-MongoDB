@@ -26,6 +26,7 @@ import {
   ApiProperty,
   ApiCookieAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { Roles } from './decorators/roles.decorator';
 import { UserRole } from '../users/schemas/user.schema';
@@ -34,6 +35,8 @@ import { FacebookAuthGuard } from './guards/facebook-auth.guard';
 import { GithubAuthGuard } from './guards/github-auth.guard';
 import { ConfigService } from '@nestjs/config';
 import { RolesGuard } from './guards/roles.guard';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 class RefreshTokenDto {
   @ApiProperty({
@@ -64,7 +67,103 @@ export class AuthController {
   })
   async register(@Body() registerDto: RegisterDto) {
     const user = await this.authService.register(registerDto);
-    return { message: 'User registered successfully', userId: user.id };
+    return {
+      message:
+        'User registered successfully. Please check your email to verify your account.',
+      userId: user.id,
+    };
+  }
+
+  // Replace both duplicate verifyEmail methods with a single implementation
+  @Public()
+  @Post('verify-email')
+  @ApiOperation({ summary: 'Verify email address using verification token' })
+  @ApiBody({ type: VerifyEmailDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Email verified successfully.',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Email verified successfully' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid verification token.',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 400 },
+        message: { type: 'string', example: 'Invalid verification token' },
+        error: { type: 'string', example: 'Bad Request' },
+      },
+    },
+  })
+  async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
+    return this.authService.verifyEmail(verifyEmailDto.token);
+  }
+
+  // Support GET method for verification via email links
+  @Public()
+  @Get('verify-email')
+  @ApiOperation({ summary: 'Verify email address via link in email' })
+  @ApiQuery({ name: 'token', description: 'Email verification token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Email verified successfully.',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Email verified successfully' },
+      },
+    },
+  })
+  async verifyEmailViaLink(@Query('token') token: string) {
+    return this.authService.verifyEmail(token);
+  }
+
+  // Replace both duplicate resendVerification methods with a single implementation
+  @Public()
+  @Post('resend-verification')
+  @ApiOperation({
+    summary: 'Resend email verification code',
+    description: 'Sends a new verification code to the specified email address',
+  })
+  @ApiBody({
+    type: ResendVerificationDto,
+    examples: {
+      validExample: {
+        summary: 'Valid Email Example',
+        description: 'A sample request with a valid email address',
+        value: { email: 'user@example.com' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Verification email sent successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: {
+          type: 'string',
+          example: 'Verification email has been sent. Please check your inbox.',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  async resendVerification(
+    @Body() resendVerificationDto: ResendVerificationDto,
+  ) {
+    return this.authService.resendVerificationEmail(
+      resendVerificationDto.email,
+    );
   }
 
   @Public()

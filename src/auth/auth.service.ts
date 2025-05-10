@@ -13,6 +13,9 @@ import { LoginDto } from './dto/login.dto';
 import { UserDocument, UserRole } from '../users/schemas/user.schema';
 import { Response } from 'express';
 import { OAuthUserDto } from './dto/oauth-user.dto';
+import { EmailsService } from '../emails/emails.service';
+// Add the correct import for crypto
+import * as cryptoModule from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +23,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private emailsService: EmailsService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -31,6 +35,17 @@ export class AuthService {
     // If no password (could be OAuth user), or password doesn't match
     if (!user.password || !(await bcrypt.compare(password, user.password))) {
       return null;
+    }
+
+    // Check if email is verified (except for OAuth users and admin)
+    if (
+      !user.emailVerified &&
+      user.authMethods.includes('local') &&
+      user.role !== UserRole.ADMIN
+    ) {
+      throw new UnauthorizedException(
+        'Please verify your email before logging in.',
+      );
     }
 
     return user;
@@ -48,40 +63,55 @@ export class AuthService {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user with verification token
     const newUser = await this.usersService.create({
       ...registerDto,
       password: hashedPassword,
-      authMethods: ['local'], // Fixed: Now this property exists in CreateUserDto
+      authMethods: ['local'],
     });
+
+    // Send verification email
+    await this.emailsService.sendVerificationEmail(
+      email,
+      newUser.emailVerificationToken,
+      newUser.firstName,
+    );
 
     return newUser;
   }
 
   async login(loginDto: LoginDto, response: Response) {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
-    if (!user) {
+    try {
+      const user = await this.validateUser(loginDto.email, loginDto.password);
+      if (!user) {
+        throw new UnauthorizedException('Invalid email or password');
+      }
+
+      const tokens = await this.generateTokens(user);
+
+      // Update lastLogin - now properly typed in UpdateUserDto
+      await this.usersService.update(user.id, { lastLogin: new Date() });
+
+      // Set cookies
+      this.setTokenCookies(response, tokens);
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          subscriptionTier: user.subscriptionTier,
+          emailVerified: user.emailVerified,
+        },
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new UnauthorizedException('Invalid email or password');
     }
-
-    const tokens = await this.generateTokens(user);
-
-    // Update lastLogin - now properly typed in UpdateUserDto
-    await this.usersService.update(user.id, { lastLogin: new Date() });
-
-    // Set cookies
-    this.setTokenCookies(response, tokens);
-
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        subscriptionTier: user.subscriptionTier,
-      },
-    };
   }
 
   async generateTokens(user: UserDocument) {
@@ -308,6 +338,70 @@ export class AuthService {
       lastName: user.lastName,
       role: user.role,
       subscriptionTier: user.subscriptionTier,
+    };
+  }
+
+  async verifyEmail(
+    token: string,
+  ): Promise<{ success: boolean; message: string }> {
+    const user = await this.usersService.findByVerificationToken(token);
+
+    if (!user) {
+      throw new BadRequestException('Invalid verification token');
+    }
+
+    if (user.emailVerified) {
+      return { success: true, message: 'Email already verified' };
+    }
+
+    await this.usersService.markEmailAsVerified(user.id);
+
+    // Send verification success email
+    await this.emailsService.sendVerificationSuccessEmail(
+      user.email,
+      user.firstName,
+    );
+
+    return { success: true, message: 'Email verified successfully' };
+  }
+
+  async resendVerificationEmail(
+    email: string,
+  ): Promise<{ success: boolean; message: string }> {
+    const user = await this.usersService.findByEmail(email);
+
+    if (!user) {
+      // Don't reveal user existence, just return success
+      return {
+        success: true,
+        message:
+          'If your email exists in our system, a verification link has been sent',
+      };
+    }
+
+    if (user.emailVerified) {
+      return { success: true, message: 'Email already verified' };
+    }
+
+    // Generate a new verification token with the correct crypto import
+    const emailVerificationToken = cryptoModule
+      .randomBytes(3)
+      .toString('hex')
+      .toUpperCase();
+
+    // Update user with new token
+    await this.usersService.update(user.id, { emailVerificationToken });
+
+    // Send verification email
+    await this.emailsService.sendVerificationEmail(
+      email,
+      emailVerificationToken,
+      user.firstName,
+    );
+
+    return {
+      success: true,
+      message: 'Verification email has been sent. Please check your inbox.',
     };
   }
 }

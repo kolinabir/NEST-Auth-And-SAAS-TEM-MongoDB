@@ -12,6 +12,298 @@ Our system uses a secure, session-based authentication flow with the following f
 - **Role-Based Access Control**: Different authorization levels based on user roles
 - **Persistent Sessions**: Server-side session persistence handling automatic authentication
 
+## API Endpoints Reference
+
+### Register a New User
+
+**Endpoint**: `POST /auth/register`
+
+**Request Body**:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+```
+
+**Response (201 Created)**:
+
+```json
+{
+  "message": "User registered successfully",
+  "userId": "60d21b4667d0d8992e610c85"
+}
+```
+
+**Error Responses**:
+
+- 400 Bad Request: Email already registered
+
+```json
+{
+  "statusCode": 400,
+  "message": "Email already registered",
+  "error": "Bad Request"
+}
+```
+
+### Login with Email and Password
+
+**Endpoint**: `POST /auth/login`
+
+**Request Body**:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123"
+}
+```
+
+**Response (200 OK)**:
+
+```json
+{
+  "user": {
+    "id": "60d21b4667d0d8992e610c85",
+    "email": "user@example.com",
+    "firstName": "John",
+    "lastName": "Doe",
+    "role": "user",
+    "subscriptionTier": "free"
+  }
+}
+```
+
+**Notes**: Also sets HTTP-only cookies for `access_token` and `refresh_token`
+
+**Error Responses**:
+
+- 401 Unauthorized: Invalid credentials
+
+```json
+{
+  "statusCode": 401,
+  "message": "Invalid email or password",
+  "error": "Unauthorized"
+}
+```
+
+### Refresh Access Token
+
+**Endpoint**: `POST /auth/refresh`
+
+**Request**: No body needed, requires `refresh_token` cookie
+
+**Response (200 OK)**:
+
+```json
+{
+  "success": true
+}
+```
+
+**Notes**: Updates HTTP-only cookies for `access_token` and `refresh_token`
+
+**Error Responses**:
+
+- 401 Unauthorized: Invalid refresh token
+
+```json
+{
+  "statusCode": 401,
+  "message": "Invalid refresh token",
+  "error": "Unauthorized"
+}
+```
+
+### Logout
+
+**Endpoint**: `DELETE /auth/logout`
+
+**Request**: No body needed
+
+**Response (200 OK)**:
+
+```json
+{
+  "success": true
+}
+```
+
+**Notes**: Clears HTTP-only cookies for `access_token` and `refresh_token`
+
+### Get User Profile
+
+**Endpoint**: `GET /auth/profile`
+
+**Request**: No body needed, requires authentication via cookie or Authorization header
+
+**Response (200 OK)**:
+
+```json
+{
+  "id": "60d21b4667d0d8992e610c85",
+  "email": "user@example.com",
+  "firstName": "John",
+  "lastName": "Doe",
+  "role": "user",
+  "subscriptionTier": "free"
+}
+```
+
+**Error Responses**:
+
+- 401 Unauthorized: Missing or invalid token
+
+```json
+{
+  "statusCode": 401,
+  "message": "Unauthorized"
+}
+```
+
+### OAuth Authentication
+
+#### Google OAuth
+
+**Initiate Flow**: `GET /auth/google`  
+**Callback**: `GET /auth/google/callback`
+
+The user will be redirected to Google for authentication. After successful authentication, they'll be redirected to the frontend URL with tokens set as cookies.
+
+#### Facebook OAuth
+
+**Initiate Flow**: `GET /auth/facebook`  
+**Callback**: `GET /auth/facebook/callback`
+
+The user will be redirected to Facebook for authentication. After successful authentication, they'll be redirected to the frontend URL with tokens set as cookies.
+
+#### GitHub OAuth
+
+**Initiate Flow**: `GET /auth/github`  
+**Callback**: `GET /auth/github/callback`
+
+The user will be redirected to GitHub for authentication. After successful authentication, they'll be redirected to the frontend URL with tokens set as cookies.
+
+### Admin Authentication Endpoints
+
+#### List All Users (Admin Only)
+
+**Endpoint**: `GET /auth/users`
+
+**Query Parameters**:
+
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10)
+
+**Request**: Requires admin authentication
+
+**Response (200 OK)**:
+
+```json
+{
+  "data": [
+    {
+      "id": "60d21b4667d0d8992e610c85",
+      "email": "user@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "role": "user",
+      "subscriptionTier": "free",
+      "createdAt": "2023-01-01T00:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "total": 50,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 5
+  }
+}
+```
+
+**Error Responses**:
+
+- 401 Unauthorized: Not authenticated
+- 403 Forbidden: Not an admin
+
+#### Create User as Admin
+
+**Endpoint**: `POST /auth/users`
+
+**Request Body**:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123",
+  "firstName": "John",
+  "lastName": "Doe",
+  "role": "user",
+  "skipEmailVerification": true
+}
+```
+
+**Response (201 Created)**:
+
+```json
+{
+  "message": "User created successfully",
+  "userId": "60d21b4667d0d8992e610c85"
+}
+```
+
+**Error Responses**:
+
+- 400 Bad Request: Email already registered
+- 401 Unauthorized: Not authenticated
+- 403 Forbidden: Not an admin
+
+#### Delete User (Admin Only)
+
+**Endpoint**: `DELETE /auth/users/:id`
+
+**Request**: Requires admin authentication
+
+**Response (200 OK)**:
+
+```json
+{
+  "success": true
+}
+```
+
+**Error Responses**:
+
+- 401 Unauthorized: Not authenticated
+- 403 Forbidden: Not an admin
+- 404 Not Found: User not found
+
+#### Manually Verify User Email (Admin Only)
+
+**Endpoint**: `POST /auth/verify-email/:id`
+
+**Request**: Requires admin authentication
+
+**Response (200 OK)**:
+
+```json
+{
+  "success": true,
+  "message": "Email verified successfully"
+}
+```
+
+**Error Responses**:
+
+- 400 Bad Request: User not found
+- 401 Unauthorized: Not authenticated
+- 403 Forbidden: Not an admin
+
 ## Getting Started
 
 ### Setup Redux Auth Slice

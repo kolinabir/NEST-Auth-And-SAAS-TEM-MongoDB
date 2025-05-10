@@ -8,6 +8,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDocument } from './schemas/user.schema';
 import { PaginatedResponse } from '../common/interfaces/base.interface';
+// Replace the crypto import
+import * as cryptoModule from 'crypto';
 
 @Injectable()
 export class UsersService {
@@ -38,7 +40,21 @@ export class UsersService {
         `User with email ${createUserDto.email} already exists`,
       );
     }
-    return this.usersRepository.create(createUserDto);
+
+    // Update the randomBytes call
+    const emailVerificationToken = cryptoModule
+      .randomBytes(3)
+      .toString('hex')
+      .toUpperCase();
+
+    // Add verification token to user data
+    const userData = {
+      ...createUserDto,
+      emailVerificationToken,
+      emailVerified: false,
+    };
+
+    return this.usersRepository.create(userData);
   }
 
   async update(
@@ -98,11 +114,14 @@ export class UsersService {
   async markEmailAsVerified(id: string): Promise<UserDocument> {
     const user = await this.findById(id);
 
-    // Fixed: Now using properties that exist in UpdateUserDto
     return this.usersRepository.update(id, {
       emailVerified: true,
       emailVerificationToken: null, // This will be converted to undefined for MongoDB
     });
+  }
+
+  async findByVerificationToken(token: string): Promise<UserDocument | null> {
+    return this.usersRepository.findOne({ emailVerificationToken: token });
   }
 
   // Add a method to find users by custom filter

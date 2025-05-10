@@ -10,6 +10,7 @@ import { AdminModule } from './admin/admin.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { PaymentsModule } from './payments/payments.module';
 import stripeConfig from './config/stripe.config';
+import { EmailsModule } from './emails/emails.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import stripeConfig from './config/stripe.config';
     AdminModule,
     SubscriptionsModule,
     PaymentsModule,
+    EmailsModule, // Add EmailsModule
   ],
   controllers: [],
   providers: [],
