@@ -52,4 +52,9 @@ export default registerAs('app', () => ({
       callbackUrl: process.env.OAUTH_GITHUB_CALLBACK_URL,
     },
   },
+
+  // Admin activity logging
+  admin: {
+    logActivityToConsole: process.env.LOG_ADMIN_ACTIVITY === 'true',
+  },
 }));

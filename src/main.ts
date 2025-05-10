@@ -14,6 +14,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
     bodyParser: false, // Disable built-in bodyParser to use custom one
+    logger: process.env.HIDE_LOGS === 'true' ? ['error', 'warn'] : undefined, // Only show errors and warnings if HIDE_LOGS is true
   });
 
   // Get config service

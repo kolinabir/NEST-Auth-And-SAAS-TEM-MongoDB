@@ -6,9 +6,12 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { AdminActivityService } from '../services/admin-activity.service';
 
 @Injectable()
 export class AdminActivityInterceptor implements NestInterceptor {
+  constructor(private readonly adminActivityService: AdminActivityService) {}
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
@@ -20,16 +23,41 @@ export class AdminActivityInterceptor implements NestInterceptor {
       tap(() => {
         const responseTime = Date.now() - now;
 
-        // Log admin activity - in a real implementation, this would be saved to the database
-        console.log({
-          adminId: user?.id,
-          action: `${method} ${url}`,
-          timestamp: new Date(),
-          responseTime,
-          ip: request.ip,
-          userAgent: request.headers['user-agent'],
-        });
+        // Only log if we have a valid admin user
+        if (user && user.id) {
+          this.adminActivityService.logActivity({
+            adminId: user.id,
+            action: `${method} ${url}`,
+            details: {
+              path: url,
+              method,
+              body: this.sanitizeRequestBody(request.body),
+              query: request.query,
+            },
+            ip: request.ip,
+            userAgent: request.headers['user-agent'],
+            responseTime,
+          });
+        }
       }),
     );
+  }
+
+  // Helper method to remove sensitive data from request body
+  private sanitizeRequestBody(body: any): any {
+    if (!body) return {};
+    
+    // Create a copy to avoid modifying the original
+    const sanitized = { ...body };
+    
+    // Remove sensitive fields
+    const sensitiveFields = ['password', 'token', 'secret', 'creditCard'];
+    for (const field of sensitiveFields) {
+      if (field in sanitized) {
+        sanitized[field] = '[REDACTED]';
+      }
+    }
+    
+    return sanitized;
   }
 }

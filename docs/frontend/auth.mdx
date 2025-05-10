@@ -1,0 +1,521 @@
+# Authentication Guide for Frontend
+
+This guide provides information on how to implement authentication in your Next.js and Redux frontend application, integrating with our NestJS backend authentication system.
+
+## Authentication Overview
+
+Our system uses a secure, session-based authentication flow with the following features:
+
+- **JWT Tokens**: Uses JWT tokens for authentication but managed via sessions on the server
+- **HTTP-Only Cookies**: Session information stored as secure HTTP-only cookies for enhanced security
+- **Multiple Auth Methods**: Support for both traditional email/password and OAuth providers (Google, Facebook, GitHub)
+- **Role-Based Access Control**: Different authorization levels based on user roles
+- **Persistent Sessions**: Server-side session persistence handling automatic authentication
+
+## Getting Started
+
+### Setup Redux Auth Slice
+
+First, create a Redux slice to manage authentication state:
+
+```typescript
+// src/store/slices/authSlice.ts
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { api } from '../../services/api';
+
+interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  subscriptionTier: string;
+}
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: AuthState = {
+  user: null,
+  isAuthenticated: false,
+  loading: false,
+  error: null,
+};
+
+// Login thunk
+export const login = createAsyncThunk(
+  'auth/login',
+  async (
+    credentials: { email: string; password: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await api.post('/auth/login', credentials);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
+    }
+  },
+);
+
+// Register thunk
+export const register = createAsyncThunk(
+  'auth/register',
+  async (
+    userData: {
+      email: string;
+      password: string;
+      firstName: string;
+      lastName: string;
+    },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await api.post('/auth/register', userData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Registration failed',
+      );
+    }
+  },
+);
+
+// Fetch user profile thunk
+export const fetchUserProfile = createAsyncThunk(
+  'auth/fetchUserProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/auth/profile');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to fetch profile',
+      );
+    }
+  },
+);
+
+// Logout thunk
+export const logout = createAsyncThunk(
+  'auth/logout',
+  async (_, { rejectWithValue }) => {
+    try {
+      await api.post('/auth/logout'); // Note: This should be a POST request for session-based auth
+      return null;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Logout failed');
+    }
+  },
+);
+
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+  },
+  extraReducers: (builder) => {
+    // Login
+    builder.addCase(login.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(login.fulfilled, (state, action) => {
+      state.loading = false;
+      state.user = action.payload.user;
+      state.isAuthenticated = true;
+    });
+    builder.addCase(login.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // Fetch profile
+    builder.addCase(fetchUserProfile.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchUserProfile.fulfilled, (state, action) => {
+      state.loading = false;
+      state.user = action.payload;
+      state.isAuthenticated = true;
+    });
+    builder.addCase(fetchUserProfile.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+      state.isAuthenticated = false;
+      state.user = null;
+    });
+
+    // Logout
+    builder.addCase(logout.fulfilled, (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
+    });
+  },
+});
+
+export const { clearError } = authSlice.actions;
+export default authSlice.reducer;
+```
+
+### API Service Setup
+
+Create an API service that handles session credentials:
+
+```typescript
+// src/services/api.ts
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+export const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  // This is essential for cookies and session data to be sent with requests
+  withCredentials: true,
+});
+
+// Add an interceptor to handle session expiration
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    // If unauthorized and not already trying to refresh, redirect to login
+    if (error.response?.status === 401) {
+      // You might want to redirect to login or handle session expiration
+      // window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  },
+);
+```
+
+## Authentication Flows
+
+### Email/Password Login
+
+For traditional login using email and password:
+
+```typescript
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../store/slices/authSlice';
+import type { AppDispatch, RootState } from '../store';
+
+const LoginForm = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading, error } = useSelector((state: RootState) => state.auth);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await dispatch(login({ email, password }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {error && <div className="error">{error}</div>}
+      <div>
+        <label>Email</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label>Password</label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+      <button type="submit" disabled={loading}>
+        {loading ? 'Logging in...' : 'Login'}
+      </button>
+    </form>
+  );
+};
+```
+
+### OAuth Authentication
+
+For OAuth providers like Google, Facebook, or GitHub:
+
+```tsx
+// Social Login Buttons Component
+const SocialLoginButtons = () => {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+  return (
+    <div className="social-login">
+      <button
+        onClick={() => (window.location.href = `${API_URL}/auth/google`)}
+        className="google-btn"
+      >
+        Sign in with Google
+      </button>
+
+      <button
+        onClick={() => (window.location.href = `${API_URL}/auth/facebook`)}
+        className="facebook-btn"
+      >
+        Sign in with Facebook
+      </button>
+
+      <button
+        onClick={() => (window.location.href = `${API_URL}/auth/github`)}
+        className="github-btn"
+      >
+        Sign in with GitHub
+      </button>
+    </div>
+  );
+};
+```
+
+### OAuth Callback Handling
+
+Create pages to handle OAuth callbacks. Since our backend uses session-based auth, the callback will establish a session cookie automatically:
+
+```tsx
+// pages/auth/success.tsx
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useDispatch } from 'react-redux';
+import { fetchUserProfile } from '../../store/slices/authSlice';
+import type { AppDispatch } from '../../store';
+
+export default function AuthSuccess() {
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      // After OAuth success, a session is already established
+      // Just fetch the user profile to update the Redux state
+      await dispatch(fetchUserProfile());
+      router.push('/dashboard');
+    };
+
+    loadUserProfile();
+  }, [dispatch, router]);
+
+  return <div>Completing login...</div>;
+}
+```
+
+```tsx
+// pages/auth/error.tsx
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+
+export default function AuthError() {
+  const router = useRouter();
+  const { message } = router.query;
+
+  useEffect(() => {
+    // Redirect to login after showing error
+    const timeout = setTimeout(() => {
+      router.push('/login');
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [router]);
+
+  return (
+    <div className="auth-error">
+      <h2>Authentication Error</h2>
+      <p>{message || 'There was an error during authentication'}</p>
+      <p>Redirecting to login page...</p>
+    </div>
+  );
+}
+```
+
+## Protected Routes
+
+Create a higher-order component to protect routes:
+
+```tsx
+// components/withAuth.tsx
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchUserProfile } from '../store/slices/authSlice';
+import type { AppDispatch, RootState } from '../store';
+
+export default function withAuth(WrappedComponent) {
+  const WithAuth = (props) => {
+    const router = useRouter();
+    const dispatch = useDispatch<AppDispatch>();
+    const { isAuthenticated, loading, user } = useSelector(
+      (state: RootState) => state.auth,
+    );
+
+    useEffect(() => {
+      if (!isAuthenticated && !loading) {
+        // Try to fetch user profile to check if session is valid
+        dispatch(fetchUserProfile())
+          .unwrap()
+          .catch(() => {
+            // Redirect to login if session check fails
+            router.push('/login');
+          });
+      }
+    }, [isAuthenticated, loading, dispatch, router]);
+
+    // Show loading while checking authentication
+    if (loading || (!isAuthenticated && !loading)) {
+      return <div>Loading...</div>;
+    }
+
+    // Render the protected component if authenticated
+    return <WrappedComponent {...props} />;
+  };
+
+  return WithAuth;
+}
+```
+
+## Role-Based Protection
+
+For routes that require specific roles:
+
+```tsx
+// components/withRole.tsx
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../store';
+
+export default function withRole(WrappedComponent, allowedRoles: string[]) {
+  const WithRole = (props) => {
+    const router = useRouter();
+    const { isAuthenticated, user } = useSelector(
+      (state: RootState) => state.auth,
+    );
+
+    useEffect(() => {
+      if (isAuthenticated && user) {
+        // Check if user has required role
+        if (!allowedRoles.includes(user.role)) {
+          router.push('/unauthorized');
+        }
+      }
+    }, [isAuthenticated, user, router]);
+
+    // Only render if authenticated and has proper role
+    if (!isAuthenticated || !user || !allowedRoles.includes(user.role)) {
+      return null;
+    }
+
+    return <WrappedComponent {...props} />;
+  };
+
+  return WithRole;
+}
+```
+
+Usage:
+
+```tsx
+// pages/admin/dashboard.tsx
+import withAuth from '../../components/withAuth';
+import withRole from '../../components/withRole';
+
+function AdminDashboard() {
+  return (
+    <div>
+      <h1>Admin Dashboard</h1>
+      {/* Admin content */}
+    </div>
+  );
+}
+
+// Apply both HOCs - first check auth, then check role
+export default withAuth(withRole(AdminDashboard, ['admin']));
+```
+
+## Auth Persistence
+
+Since we're using session-based authentication, the session persists automatically via cookies. We just need to check if the session is valid on app load:
+
+```tsx
+// pages/_app.tsx
+import { useEffect } from 'react';
+import { Provider } from 'react-redux';
+import { fetchUserProfile } from '../store/slices/authSlice';
+import { store } from '../store';
+import type { AppProps } from 'next/app';
+import type { AppDispatch } from '../store';
+
+function MyApp({ Component, pageProps }: AppProps) {
+  useEffect(() => {
+    // Try to restore auth state from session when app loads
+    store.dispatch<AppDispatch>(fetchUserProfile()).catch(() => {
+      // Silently fail - user is not logged in or session expired
+    });
+  }, []);
+
+  return (
+    <Provider store={store}>
+      <Component {...pageProps} />
+    </Provider>
+  );
+}
+
+export default MyApp;
+```
+
+## Implementing Logout
+
+Create a logout component that calls the server to end the session:
+
+```tsx
+// components/LogoutButton.tsx
+import { useDispatch, useSelector } from 'react-redux';
+import { useRouter } from 'next/router';
+import { logout } from '../store/slices/authSlice';
+import type { AppDispatch, RootState } from '../store';
+
+export default function LogoutButton() {
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+  const { loading } = useSelector((state: RootState) => state.auth);
+
+  const handleLogout = async () => {
+    await dispatch(logout());
+    router.push('/login');
+  };
+
+  return (
+    <button onClick={handleLogout} disabled={loading}>
+      {loading ? 'Logging out...' : 'Logout'}
+    </button>
+  );
+}
+```
+
+## Conclusion
+
+This authentication system provides secure, session-based authentication for your Next.js application. Key advantages include:
+
+1. **Security**: Session data stored in httpOnly cookies to prevent XSS attacks
+2. **Convenience**: Server-side session management handles authentication state
+3. **Flexibility**: Support for multiple authentication methods (local, Google, Facebook, GitHub)
+4. **Control**: Role-based access control for protected routes
+
+By following this guide, you should be able to integrate your Next.js Redux frontend with the NestJS backend authentication system, providing a seamless and secure user experience.
